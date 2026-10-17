@@ -1,0 +1,21 @@
+# MongoDB 8 satu node untuk S1, S10, dan S100.
+# Jalankan dari folder ini:    docker compose up -d
+# Berhenti (data tetap):       docker compose stop
+# Hapus kontainer (data tetap): docker compose down
+# Hapus semua termasuk data:   docker compose down -v
+# Cache WiredTiger dibatasi 0,5 GB supaya ketiga penyimpanan diuji dengan memori sepadan.
+# Mau cache lain? Buat berkas .env di folder ini berisi:  MONGO_CACHE_GB=1
+services:
+  mongo:
+    image: mongo:8
+    container_name: sen12ls-mongo
+    command: ["mongod", "--bind_ip_all", "--wiredTigerCacheSizeGB", "${MONGO_CACHE_GB:-0.5}"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ../data:/sen12ls-data:ro
+      - ./:/scripts:ro
+
+volumes:
+  mongo_data:

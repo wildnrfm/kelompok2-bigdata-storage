@@ -1,0 +1,17 @@
+# Akhir baris LF di semua berkas teks (Windows tidak mengubahnya menjadi CRLF).
+# Penting untuk hdfs-parquet/hadoop.env, skrip SQL dan JS, dan checksum.
+* text=auto eol=lf
+
+# Berkas biner
+*.zip binary
+*.parquet binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.xlsx binary
+
+# Berkas sumber data: byte-nya TIDAK boleh berubah sedikit pun (checksum SHA-256 di data/raw/SHA256.txt)
+data/raw/** binary
+data/raw/README.md text eol=lf

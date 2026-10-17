@@ -1,0 +1,55 @@
+# Baseline: HDFS (1 NameNode + 2 DataNode) dan Spark, Parquet disimpan di HDFS.
+# INI YANG PALING BERAT. Jalankan satu penyimpanan sekali waktu (matikan MongoDB dan PostGIS dulu).
+# Jalankan dari folder ini:     docker compose up -d
+# Berhenti (data HDFS tetap):   docker compose stop
+# Hapus kontainer DAN data HDFS: docker compose down   (Parquet bisa dibuat ulang dari CSV dengan
+#                                csv_to_parquet.py; CSV di komputermu tidak ikut terhapus)
+# Konfigurasi HDFS ada di hadoop.env (nama kunci mengikuti image apache/hadoop).
+services:
+  namenode:
+    image: apache/hadoop:3.5.0
+    container_name: sen12ls-namenode
+    hostname: namenode
+    command: ["hdfs", "namenode"]
+    env_file:
+      - ./hadoop.env
+    environment:
+      ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+    ports:
+      - "9870:9870"
+    volumes:
+      - ../data:/sen12ls-data:ro
+
+  datanode1:
+    image: apache/hadoop:3.5.0
+    container_name: sen12ls-datanode1
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - namenode
+
+  datanode2:
+    image: apache/hadoop:3.5.0
+    container_name: sen12ls-datanode2
+    command: ["hdfs", "datanode"]
+    env_file:
+      - ./hadoop.env
+    depends_on:
+      - namenode
+
+  spark:
+    image: spark:3.5.0-python3
+    container_name: sen12ls-spark
+    user: "0:0"
+    command: ["sleep", "infinity"]
+    ports:
+      - "4040:4040"
+    volumes:
+      - ../data:/sen12ls-data:ro
+      - ../bench:/bench:ro
+      - ../results:/results
+      - ./:/hdfs-parquet:ro
+    depends_on:
+      - namenode
+

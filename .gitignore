@@ -1,0 +1,36 @@
+# Hasil konversi dan simulasi: dibuat ulang di tiap laptop dari data/raw (checksum di data/CHECKSUMS.txt)
+data/out/
+
+# Folder kerja pribadi Wildan (inventaris mentah dan laporan awal): tidak boleh ikut ke GitHub
+cek-sen12ls/
+
+# Rahasia dan lingkungan: jangan pernah di-commit
+.env
+.env.*
+*.pem
+*.key
+rahasia/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Editor dan sistem
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Sisa sementara (log, Spark/Hive lokal)
+*.tmp
+*.log
+spark-warehouse/
+metastore_db/
+derby.log
+
+# ZIP paket awal: jangan ikut di-commit
+kelompok2-paket-awal.zip

@@ -1,0 +1,25 @@
+# PostgreSQL 17 + PostGIS 3.5 satu node untuk S1, S10, dan S100.
+# Jalankan dari folder ini:     docker compose up -d
+# Berhenti (data tetap):        docker compose stop
+# Hapus kontainer (data tetap): docker compose down
+# Hapus semua termasuk data:    docker compose down -v
+# Sandi di bawah HANYA untuk uji coba di laptop sendiri (kontainer tidak dibuka ke jaringan luar
+# selain port 5433 di komputermu). Jangan pakai sandi ini di tempat lain.
+services:
+  postgis:
+    image: postgis/postgis:17-3.5
+    container_name: sen12ls-postgis
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: sen12ls
+    command: ["postgres", "-c", "shared_buffers=256MB"]
+    ports:
+      - "5433:5432"
+    shm_size: 256mb
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ../data:/sen12ls-data:ro
+      - ./:/sql:ro
+
+volumes:
+  pg_data:
