@@ -8,7 +8,6 @@
 | Sofi | Marsanda Sofi Aminarti | 23051204066 | [marsandasofi](https://github.com/marsandasofi) | Performance Analyst memimpin; Storage A (MongoDB) membantu | `bench/`, `results/` |
 | Levi | Muhammad Syah Levi | 23051204051 | [SyahLev](https://github.com/SyahLev) | Storage B (PostgreSQL/PostGIS + baseline HDFS-Parquet) | `postgis/`, `hdfs-parquet/` |
 
-> **Catatan untuk Wildan (#6):** cocokkan nama lengkap Syuep dengan data resmi; perbaiki di sini bila berbeda. Hapus catatan ini setelah dicocokkan.
 
 ## Spesifikasi laptop (27 Okt 2026)
 
