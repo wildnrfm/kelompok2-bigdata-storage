@@ -8,8 +8,19 @@
 | Sofi | Marsanda Sofi Aminarti | 23051204066 | [marsandasofi](https://github.com/marsandasofi) | Performance Analyst memimpin; Storage A (MongoDB) membantu | `bench/`, `results/` |
 | Levi | Muhammad Syah Levi | 23051204051 | [SyahLev](https://github.com/SyahLev) | Storage B (PostgreSQL/PostGIS + baseline HDFS-Parquet) | `postgis/`, `hdfs-parquet/` |
 
-> **Catatan untuk Wildan (#2.10 dan #6):** nama lengkap Syuep di atas disusun dari urutan namanya; cocokkan dengan data resmi dan perbaiki di sini bila berbeda.
-> Hapus catatan ini setelah dicocokkan.
+> **Catatan untuk Wildan (#6):** cocokkan nama lengkap Syuep dengan data resmi; perbaiki di sini bila berbeda. Hapus catatan ini setelah dicocokkan.
+
+## Spesifikasi laptop (27 Okt 2026)
+
+Semua pengukuran waktu yang masuk laporan diukur di **satu laptop uji** (Elsa).
+
+| Panggilan | Prosesor | RAM | Disk kosong | OS | WSL memory | Catatan |
+|---|---|---|---|---|---|---|
+| Wildan | Intel i5-6200U @ 2.30 GHz | 12 GB | 42 GB | Windows | 6 GB | Docs/QA, tidak menjalankan Docker |
+| Syuep | AMD Ryzen 5 5500U | 6 GB | 54 GB | Windows | 3 GB | Data scripts saja (Python, tanpa Docker) |
+| Elsa | Intel i5-13420H (Gen 13) | 16 GB | 290 GB | Windows | — | **Laptop uji utama** 🏆 |
+| Sofi | Intel i3-1215U (Gen 12) | 8 GB | 58 GB | Windows | 4 GB | |
+| Levi | Intel i5-8250U @ 1.60 GHz | 8 GB | 18 GB | Windows | 4 GB | Disk terbatas; satu penyimpanan sekali waktu |
 
 ## Aturan kerja singkat
 
