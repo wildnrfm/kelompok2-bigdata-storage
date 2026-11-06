@@ -1,0 +1,4 @@
+penyimpanan,beban_kerja,skala,ulangan,cold_warm,kueri_id,waktu_ms,jumlah_hasil,catatan
+spark,W5,S10,1,warm,1,754.802,35,
+spark,W5,S10,2,warm,1,645.730,35,
+spark,W5,S10,3,warm,1,670.541,35,

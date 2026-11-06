@@ -1,0 +1,4 @@
+penyimpanan,beban_kerja,skala,ulangan,cold_warm,kueri_id,waktu_ms,jumlah_hasil,catatan
+postgis,W6,S100,1,warm,1,65.404,33,
+postgis,W6,S100,2,warm,1,74.683,33,
+postgis,W6,S100,3,warm,1,73.143,33,

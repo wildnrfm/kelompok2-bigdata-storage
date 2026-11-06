@@ -1,0 +1,4 @@
+penyimpanan,beban_kerja,skala,ulangan,cold_warm,kueri_id,waktu_ms,jumlah_hasil,catatan
+mongodb,W6,S100,1,warm,1,130.127,33,
+mongodb,W6,S100,2,warm,1,131.669,33,
+mongodb,W6,S100,3,warm,1,158.257,33,
