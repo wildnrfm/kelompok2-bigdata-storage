@@ -1,0 +1,13 @@
+tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
+2026-11-07 13:13,mentah,S1,ukuran_total,annotations.csv,18.780,MiB,
+2026-11-07 13:13,mentah,S1,ukuran_total,annotations.ndjson,54.462,MiB,
+2026-11-07 13:13,mentah,S1,ukuran_total,patches.csv,0.479,MiB,
+2026-11-07 13:13,mentah,S1,ukuran_total,patches.ndjson,0.902,MiB,
+2026-11-07 13:13,mentah,S10,ukuran_total,annotations.csv,188.515,MiB,
+2026-11-07 13:13,mentah,S10,ukuran_total,annotations.ndjson,545.337,MiB,
+2026-11-07 13:13,mentah,S10,ukuran_total,patches.csv,4.905,MiB,
+2026-11-07 13:13,mentah,S10,ukuran_total,patches.ndjson,9.135,MiB,
+2026-11-07 13:13,mentah,S100,ukuran_total,annotations.csv,1898.734,MiB,
+2026-11-07 13:13,mentah,S100,ukuran_total,annotations.ndjson,5466.947,MiB,
+2026-11-07 13:13,mentah,S100,ukuran_total,patches.csv,49.913,MiB,
+2026-11-07 13:13,mentah,S100,ukuran_total,patches.ndjson,92.218,MiB,

@@ -1,0 +1,21 @@
+tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
+2026-11-07 12:46,postgis,S1,ukuran_data_di_disk,annotations,24.656,MiB,
+2026-11-07 12:46,postgis,S1,ukuran_indeks,annotations,9.773,MiB,
+2026-11-07 12:46,postgis,S1,ukuran_total,annotations,34.469,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:46,postgis,S1,ukuran_data_di_disk,patches,0.625,MiB,
+2026-11-07 12:46,postgis,S1,ukuran_indeks,patches,0.266,MiB,
+2026-11-07 12:46,postgis,S1,ukuran_total,patches,0.930,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:47,postgis,S10,ukuran_data_di_disk,annotations,246.797,MiB,
+2026-11-07 12:47,postgis,S10,ukuran_indeks,annotations,95.812,MiB,
+2026-11-07 12:47,postgis,S10,ukuran_total,annotations,342.703,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:47,postgis,S10,ukuran_data_di_disk,patches,6.367,MiB,
+2026-11-07 12:47,postgis,S10,ukuran_indeks,patches,2.211,MiB,
+2026-11-07 12:47,postgis,S10,ukuran_total,patches,8.617,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:51,postgis,S10,indeks,semua,4.177,detik,
+2026-11-07 12:57,postgis,S100,ukuran_data_di_disk,annotations,2468.016,MiB,
+2026-11-07 12:57,postgis,S100,ukuran_indeks,annotations,941.180,MiB,
+2026-11-07 12:57,postgis,S100,ukuran_total,annotations,3409.906,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:57,postgis,S100,ukuran_data_di_disk,patches,64.727,MiB,
+2026-11-07 12:57,postgis,S100,ukuran_indeks,patches,22.406,MiB,
+2026-11-07 12:57,postgis,S100,ukuran_total,patches,87.188,MiB,pg_total_relation_size (termasuk TOAST)
+2026-11-07 12:59,postgis,S100,tambah_batch,annotations+patches,4.461,detik,

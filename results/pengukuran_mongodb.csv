@@ -1,0 +1,34 @@
+tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
+2026-11-06 23:47,mongodb,S1,jumlah_dokumen,annotations,74956.000,dokumen,
+2026-11-06 23:47,mongodb,S1,ukuran_data_tak_terkompres,annotations,45.417,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_data_di_disk,annotations,9.730,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_indeks,annotations,5.312,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_total,annotations,15.043,MiB,storageSize + totalIndexSize
+2026-11-06 23:47,mongodb,S1,jumlah_dokumen,patches,4392.000,dokumen,
+2026-11-06 23:47,mongodb,S1,ukuran_data_tak_terkompres,patches,0.948,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_data_di_disk,patches,0.184,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_indeks,patches,0.125,MiB,
+2026-11-06 23:47,mongodb,S1,ukuran_total,patches,0.309,MiB,storageSize + totalIndexSize
+2026-11-06 23:49,mongodb,S10,jumlah_dokumen,annotations,749560.000,dokumen,
+2026-11-06 23:49,mongodb,S10,ukuran_data_tak_terkompres,annotations,454.166,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_data_di_disk,annotations,119.676,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_indeks,annotations,65.453,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_total,annotations,185.129,MiB,storageSize + totalIndexSize
+2026-11-06 23:49,mongodb,S10,jumlah_dokumen,patches,43920.000,dokumen,
+2026-11-06 23:49,mongodb,S10,ukuran_data_tak_terkompres,patches,9.597,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_data_di_disk,patches,1.723,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_indeks,patches,0.980,MiB,
+2026-11-06 23:49,mongodb,S10,ukuran_total,patches,2.703,MiB,storageSize + totalIndexSize
+2026-11-07 00:10,mongodb,S10,indeks,semua,23.937,detik,
+2026-11-07 00:29,mongodb,S100,jumlah_dokumen,annotations,7495600.000,dokumen,
+2026-11-07 00:29,mongodb,S100,ukuran_data_tak_terkompres,annotations,4541.658,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_data_di_disk,annotations,1218.797,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_indeks,annotations,613.621,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_total,annotations,1832.418,MiB,storageSize + totalIndexSize
+2026-11-07 00:29,mongodb,S100,jumlah_dokumen,patches,439200.000,dokumen,
+2026-11-07 00:29,mongodb,S100,ukuran_data_tak_terkompres,patches,96.455,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_data_di_disk,patches,17.172,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_indeks,patches,12.367,MiB,
+2026-11-07 00:29,mongodb,S100,ukuran_total,patches,29.539,MiB,storageSize + totalIndexSize
+2026-11-07 00:32,mongodb,S100,tambah_batch,annotations,42.074,detik,
+2026-11-07 00:32,mongodb,S100,tambah_batch,patches,0.731,detik,
