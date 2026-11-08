@@ -321,3 +321,4 @@ Ini ringkasan angka paling penting untuk menjawab pertanyaan dosen:
 | Jawaban benar (ground truth) | `bench/benar/W1_S1.csv` s.d. `W6_S1.csv` | Excel |
 | Titik koordinat uji | `bench/points.json` | Notepad / `python -c "import json; ..."` |
 | Hash integritas data | `data/CHECKSUMS.txt` | Notepad |
+

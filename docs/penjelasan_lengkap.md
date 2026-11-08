@@ -530,3 +530,4 @@ Siapa pun dapat mereproduksi seluruh benchmark dengan:
 6. `python bench/summarize.py`
 
 Seed acak tetap `20261023` menjamin hasil generator identik di semua mesin.
+
