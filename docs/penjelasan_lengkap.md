@@ -241,8 +241,10 @@ Bukan kueri, tapi pengukuran:
 - Dicatat menggunakan skrip `bench/catat.py`
 
 ### W8 — Batch Append (Tambah Data Ke Tabel Aktif)
-**Pertanyaan:** "Berapa lama waktu yang dibutuhkan untuk menambahkan 1 batch data baru (74.956 baris) ke tabel S100 yang sudah berisi 7,5 juta baris dan sudah terindeks penuh?"
+**Pertanyaan:** "Berapa lama waktu yang dibutuhkan untuk menambahkan 1 batch data baru (`batch100`, 74.956 baris anotasi + 4.392 patch) ke tabel S100 yang sudah berisi 7,5 juta baris dan sudah terindeks penuh?"
 - Menguji kemampuan penulisan tambahan (*append write*) tanpa rekonstruksi tabel
+- **Hasil:** MongoDB annotations = **42,074 detik**, MongoDB patches = **0,731 detik**; PostGIS (annotations + patches) = **4,461 detik**
+- Sumber data: `results/pengukuran_mongodb.csv` dan `results/pengukuran_postgis.csv` (jenis = `tambah_batch`)
 
 ### E1 — Eksperimen Tanpa Indeks
 Menjalankan W2, W3, W4 pada skala S10 **setelah semua indeks dihapus** (`drop_indexes.js` / `drop_indexes.sql`).
@@ -307,7 +309,7 @@ Seluruh pengukuran dilakukan **di satu laptop uji tunggal** (Elsa Claudia Putri)
 
 ### 7.1 Perbandingan Latensi Median
 
-Sumber data: `results/banding.csv` dan `results/ringkasan.csv`.
+Sumber data: `results/banding.csv` (**28 baris**, satu per skenario unik) dan `results/ringkasan.csv` (**74 grup**, statistik lengkap per database × workload × skala × kondisi).
 
 | Workload | Skala | Kondisi | MongoDB (ms) | PostGIS (ms) | Spark (ms) | Tercepat |
 |---|---|---|---|---|---|---|
