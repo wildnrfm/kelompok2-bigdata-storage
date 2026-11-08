@@ -33,7 +33,7 @@ Proyek ini adalah tugas mata kuliah **Big Data Storage** yang meminta mahasiswa 
 
 ### 2.1 Sumber Data: Sen12Landslides
 
-Dataset yang dipakai bernama **Sen12Landslides**, yaitu katalog inventaris kejadian tanah longsor (*landslide*) dari seluruh dunia, dikumpulkan dari berbagai inventaris global dan dipasangkan dengan citra satelit Sentinel-1 dan Sentinel-2.
+Dataset yang dipakai bernama **Sen12Landslides**, yaitu katalog inventaris kejadian tanah longsor (*landslide*) dari seluruh dunia, dikumpulkan dari **11 inventaris global** di **16 lokasi** (antara lain Iburi/Jepang, Kodagu/India, Hiroshima/Jepang, Kaikoura/Selandia Baru, dll) dan dipasangkan dengan citra satelit Sentinel-1 dan Sentinel-2.
 
 > **Sitasi wajib:** Höhn, P., Strunz, G., & Riedlinger, T. (2025). *Sen12Landslides: A multi-sensor benchmark dataset for landslide detection*. Scientific Data, 12:1772. DOI: `10.57967/hf/5883`. Lisensi: CC BY 4.0.
 
@@ -309,24 +309,39 @@ Seluruh pengukuran dilakukan **di satu laptop uji tunggal** (Elsa Claudia Putri)
 
 ### 7.1 Perbandingan Latensi Median
 
-Sumber data: `results/banding.csv` (**28 baris**, satu per skenario unik) dan `results/ringkasan.csv` (**74 grup**, statistik lengkap per database × workload × skala × kondisi).
+Sumber data: `results/banding.csv` (**28 baris data**, satu per skenario unik) dan `results/ringkasan.csv` (**74 grup**, statistik lengkap per database × workload × skala × kondisi).
 
-| Workload | Skala | Kondisi | MongoDB (ms) | PostGIS (ms) | Spark (ms) | Tercepat |
-|---|---|---|---|---|---|---|
-| W1 | S1 | Warm | 1,163 | 1,356 | 113,689 | **MongoDB** |
-| W1 | S10 | Warm | 1,451 | **0,724** | 84,221 | **PostGIS** |
-| W1 | S100 | Warm | 0,681 | 0,681 | 205,740 | **Seri** |
-| W2 | S1 | Warm | 2,066 | **1,057** | 136,850 | **PostGIS** |
-| W2 | S10 | Warm | 2,461 | **0,909** | 155,132 | **PostGIS** |
-| W2 | S100 | Warm | 7,741 | **1,202** | 545,959 | **PostGIS (454×)** |
-| W3 | S1 | Warm | 1,801 | **1,052** | 128,764 | **PostGIS** |
-| W3 | S10 | Cold | 3,519 | **0,822** | - | **PostGIS** |
-| W3 | S100 | Warm | **9,547** | 12,956 | 636,928 | **MongoDB** |
-| W4 | S1 | Warm | 8,953 | **1,473** | 126,941 | **PostGIS** |
-| W4 | S10 | Warm | 22,733 | **2,011** | 187,785 | **PostGIS** |
-| W4 | S100 | Warm | 639,974 | **32,973** | 926,173 | **PostGIS (19,4×)** |
-| W5 | S100 | Warm | 6.869,304 | 1.141,604 | **1.293,227** | **Spark (5,3× vs Mongo)** |
-| W6 | S100 | Warm | 131,669 | **73,143** | 531,194 | **PostGIS** |
+**Tabel lengkap semua skenario dari `banding.csv`:**
+
+| Workload | Skala | Kondisi | Varian | MongoDB (ms) | PostGIS (ms) | Spark (ms) | Tercepat |
+|---|---|---|---|---|---|---|---|
+| W1 | S1 | Warm | — | 1,163 | 1,356 | 113,689 | **MongoDB** |
+| W1 | S10 | Warm | — | 1,451 | **0,724** | 84,221 | **PostGIS** |
+| W1 | S100 | Warm | — | 0,681 | 0,681 | 205,740 | **Seri (identik)** |
+| W2 | S1 | Warm | — | 2,066 | **1,057** | 136,850 | **PostGIS** |
+| W2 | S10 | Warm | — | 2,461 | **0,909** | 155,132 | **PostGIS** |
+| W2 | S10 | Warm | tanpa-indeks | 1.119,729 | **213,921** | — | **PostGIS** |
+| W2 | S100 | Warm | — | 7,741 | **1,202** | 545,959 | **PostGIS (454×)** |
+| W3 | S1 | Warm | — | 1,801 | **1,052** | 128,764 | **PostGIS** |
+| W3 | S10 | Cold | — | 3,519 | **0,822** | — | **PostGIS** |
+| W3 | S10 | Warm | — | 2,175 | **2,050** | 165,380 | **PostGIS** |
+| W3 | S10 | Warm | tanpa-indeks | 440,877 | **158,250** | — | **PostGIS** |
+| W3 | S100 | Cold | — | 12,250 | **3,094** | — | **PostGIS** |
+| W3 | S100 | Warm | — | **9,547** | 12,956 | 636,928 | **MongoDB** |
+| W4 | S1 | Warm | — | 8,953 | **1,473** | 126,941 | **PostGIS** |
+| W4 | S10 | Warm | — | 22,733 | **2,011** | 187,785 | **PostGIS** |
+| W4 | S10 | Warm | tanpa-indeks | 632,785 | **196,672** | — | **PostGIS** |
+| W4 | S100 | Warm | — | 639,974 | **32,973** | 926,173 | **PostGIS (19,4×)** |
+| W5 | S1 | Warm | — | 50,870 | **30,382** | 630,264 | **PostGIS** |
+| W5 | S10 | Cold | — | 1.176,506 | **74,190** | — | **PostGIS** |
+| W5 | S10 | Warm | — | 523,681 | **135,430** | 670,541 | **PostGIS** |
+| W5 | S100 | Cold | — | 4.483,146 | **727,333** | — | **PostGIS** |
+| W5 | S100 | Warm | — | 6.869,304 | **1.141,604** | 1.293,227 | **PostGIS** (Spark 5,3× lebih cepat dari MongoDB) |
+| W6 | S1 | Warm | — | 3,771 | **3,694** | 432,323 | **PostGIS** |
+| W6 | S10 | Warm | — | **14,412** | 21,971 | 516,875 | **MongoDB** |
+| W6 | S100 | Warm | — | 131,669 | **73,143** | 531,194 | **PostGIS** |
+
+> **Catatan W1 S100 konkurensi:** p95 latensi dijabarkan di Bagian 7.4. `banding.csv` juga mencatat: 10 klien PostGIS 0,828 ms; 50 klien PostGIS 4,018 ms; 100 klien PostGIS 12,497 ms.
 
 ### 7.2 Jejak Penyimpanan di Disk (Skala S100, 7,5 Juta Baris)
 
@@ -353,6 +368,19 @@ Sumber data: `results/banding.csv` (**28 baris**, satu per skenario unik) dan `r
 | 10 klien | ~5 ms | ~3 ms |
 | 50 klien | 17,831 ms | 8,346 ms |
 | 100 klien | 37,160 ms | 25,750 ms |
+
+### 7.5 Cold Run — Efek Cache Dingin (W3 & W5)
+
+Cold run dijalankan dengan merestart container Docker sebelum setiap sesi, mensimulasikan kondisi database baru dinyalakan (page cache OS kosong). Diuji pada W3 (spasial-temporal) dan W5 (agregasi besar) untuk 3 ulangan per skenario.
+
+| Workload | Skala | MongoDB Cold (ms) | PostGIS Cold (ms) | Rasio Cold vs Warm (PostGIS) |
+|---|---|---|---|---|
+| W3 | S10 | 3,519 | **0,822** | ~0,4× (PostGIS lebih cepat cold!) |
+| W3 | S100 | 12,250 | **3,094** | ~0,24× |
+| W5 | S10 | 1.176,506 | **74,190** | ~0,55× |
+| W5 | S100 | 4.483,146 | **727,333** | ~0,64× |
+
+Catatan: PostGIS mempertahankan keunggulan mutlak bahkan pada kondisi cold. Perbedaan cold vs warm lebih terasa di MongoDB karena WiredTiger lebih bergantung pada OS page cache untuk working set index-nya.
 
 ---
 
@@ -508,7 +536,58 @@ kelompok2-bigdata-storage/
 
 ---
 
-## BAGIAN 11: ATRIBUSI DAN REPRODUSIBILITAS
+## BAGIAN 11: ALUR KERJA TIM DAN GIT WORKFLOW
+
+### Pembagian Tugas dan Penanggung Jawab Folder
+
+| Anggota | Peran | Folder yang Dikerjakan |
+|---|---|---|
+| **Muhammad Wildan Arif Maulana** | Project Lead, Dokumentasi & QA | `docs/`, `tests/`, file di root repo |
+| **Maulana Hidayah Syaif Ali Khan** | Data Collection Engineer | `data/` |
+| **Elsa Claudia Putri** | Storage Engineer A (MongoDB) + Benchmark Lead | `mongodb/`, `results/` |
+| **Muhammad Syah Levi** | Storage Engineer B (PostGIS + HDFS) | `postgis/`, `hdfs-parquet/` |
+| **Marsanda Sofi Aminarti** | Performance Analyst + Validation Lead | `bench/`, `results/` |
+
+### Alur Git yang Dipakai Tim
+
+Setiap anggota bekerja di laptop masing-masing dengan alur berikut:
+
+```powershell
+# Ambil update terbaru dari GitHub
+git pull --rebase
+
+# ... kerjakan tugas lokal ...
+
+# Simpan perubahan dengan pesan yang bermakna
+git add [folder-milikmu]/
+git commit -m "[folder] deskripsi singkat apa yang dilakukan"
+
+# Ambil update terbaru lagi (kalau ada orang lain yang push duluan)
+git pull --rebase
+
+# Kirim ke GitHub
+git push
+```
+
+**Aturan Git tim:**
+- Pesan commit diawali `[nama-folder]`, contoh: `[mongodb] muat S100 dan buat indeks`, `[results] tambah benchmark W3 cold S10`
+- Jangan pernah `git push --force`
+- Folder `data/out/` tidak di-commit (ada di `.gitignore`) — setiap anggota generate sendiri dari `data/raw/` menggunakan skrip yang sama
+- File `results/` boleh diisi siapa saja yang menjalankan benchmark
+- Konflik diselesaikan lewat pesan `[BLOKIR]` di grup WhatsApp
+
+### Konvensi Pesan di Grup WhatsApp
+
+| Tag | Kapan Dipakai | Contoh |
+|---|---|---|
+| `[SELESAI]` | Langkah selesai | `[SELESAI] #13 mongodb: S1 termuat, 74956 dokumen` |
+| `[BLOKIR]` | Macet lebih dari 1 jam | `[BLOKIR] docker compose up gagal port conflict @Wildan` |
+| `[KEPUTUSAN]` | Hal yang disepakati bersama | `[KEPUTUSAN] S100 W2–W4 dibatasi 20 titik` |
+| `[Tinjau]` | Temuan saat tinjau silang | `[Tinjau] @Sofi - ringkasan.csv - galat_n ≠ 0 di W5 S10` |
+
+---
+
+## BAGIAN 12: ATRIBUSI DAN REPRODUSIBILITAS
 
 ### Sitasi Dataset Wajib
 > Höhn, P., Strunz, G., & Riedlinger, T. (2025). *Sen12Landslides: A multi-sensor benchmark dataset for landslide detection.* Scientific Data, 12:1772. DOI: `10.57967/hf/5883`. Lisensi: CC BY 4.0.
