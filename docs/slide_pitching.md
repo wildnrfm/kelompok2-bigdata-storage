@@ -11,18 +11,18 @@
 ---
 
 ## 📽️ SLIDE 1: JUDUL & ANGGOTA TIM
-* **Pembicara:** Muhammad Wildan Romadhoni (Project Lead)
+* **Pembicara:** Muhammad Wildan Arif Maulana (Project Lead)
 * **Waktu:** ~1 menit
 
 ### Konten Slide:
 * **Judul:** Benchmark Performa Spatial-Temporal Big Data: MongoDB 8 vs. PostgreSQL 17/PostGIS 3.5 vs. Baseline HDFS-Parquet (Apache Spark 3.5)
 * **Studi Kasus:** Katalog Metadata Deteksi Tanah Longsor Global (*Sen12Landslides*)
 * **Anggota Kelompok 2:**
-  1. Muhammad Wildan Romadhoni (23051204065) — *Project Lead & Documentation*
-  2. Syuep (23051204068) — *Data Collection & Conversion Engineer*
+  1. Muhammad Wildan Arif Maulana (23051204065) — *Project Lead & Documentation*
+  2. Maulana Hidayah Syaif Ali Khan (23051204068) — *Data Collection & Conversion Engineer*
   3. Elsa Claudia Putri (23051204038) — *Storage Engineer A (MongoDB Specialist)*
-  4. Muhammad Syarifuddin Levi (23051204051) — *Storage Engineer B (PostGIS & HDFS Specialist)*
-  5. Marsanda Sofi Salsabila (23051204066) — *Performance Analyst & Validation Lead*
+  4. Muhammad Syah Levi (23051204051) — *Storage Engineer B (PostGIS & HDFS Specialist)*
+  5. Marsanda Sofi Aminarti (23051204066) — *Performance Analyst & Validation Lead*
 
 > 🎙️ **Naskah Wildan:**
 > *"Selamat pagi/siang Bapak/Ibu Dosen dan rekan-rekan sekalian. Kami dari Kelompok 2 akan mempresentasikan hasil benchmark komprehensif sistem penyimpanan big data untuk data observasi bumi spasial-temporal, membandingkan MongoDB, PostGIS, dan arsitektur analitik HDFS-Parquet dengan Apache Spark."*
@@ -30,7 +30,7 @@
 ---
 
 ## 📽️ SLIDE 2: MASALAH, LATAR BELAKANG, & SKENARIO PENGGUNA
-* **Pembicara:** Muhammad Wildan Romadhoni
+* **Pembicara:** Muhammad Wildan Arif Maulana
 * **Waktu:** ~1,5 menit
 
 ### Konten Slide:
@@ -68,7 +68,7 @@
 ---
 
 ## 📽️ SLIDE 4: ARSITEKTUR 3 DATABASE & PIPELINE PENGUJIAN
-* **Pembicara:** Elsa Claudia Putri & Muhammad Syarifuddin Levi
+* **Pembicara:** Elsa Claudia Putri & Muhammad Syah Levi
 * **Waktu:** ~2 menit
 
 ### Konten Slide:
@@ -94,7 +94,7 @@
 ---
 
 ## 📽️ SLIDE 5: METODOLOGI UJI & TEMUAN UTAMA (H1–H5)
-* **Pembicara:** Marsanda Sofi Salsabila
+* **Pembicara:** Marsanda Sofi Aminarti
 * **Waktu:** ~2 menit
 
 ### Konten Slide:
@@ -112,7 +112,7 @@
 ---
 
 ## 📽️ SLIDE 6: KESIMPULAN & REKOMENDASI ARSITEKTUR
-* **Pembicara:** Muhammad Wildan Romadhoni
+* **Pembicara:** Muhammad Wildan Arif Maulana
 * **Waktu:** ~1,5 menit
 
 ### Konten Slide:

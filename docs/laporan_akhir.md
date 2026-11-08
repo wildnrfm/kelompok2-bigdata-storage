@@ -8,11 +8,11 @@
 **Kelompok:** 2  
 
 ### Anggota Tim:
-1. **Muhammad Wildan Romadhoni** (23051204065) — *Project Lead, Documentation & QA*
-2. **Syuep** (23051204068) — *Data Collection & Conversion Engineer*
+1. **Muhammad Wildan Arif Maulana** (23051204065) — *Project Lead, Documentation & QA*
+2. **Maulana Hidayah Syaif Ali Khan** (23051204068) — *Data Collection & Conversion Engineer*
 3. **Elsa Claudia Putri** (23051204038) — *Storage Engineer A (MongoDB Specialist & Benchmark Lead)*
-4. **Muhammad Syarifuddin Levi** (23051204051) — *Storage Engineer B (PostGIS & HDFS-Spark Specialist)*
-5. **Marsanda Sofi Salsabila** (23051204066) — *Performance Analyst & Validation Lead*
+4. **Muhammad Syah Levi** (23051204051) — *Storage Engineer B (PostGIS & HDFS-Spark Specialist)*
+5. **Marsanda Sofi Aminarti** (23051204066) — *Performance Analyst & Validation Lead*
 
 ---
 
