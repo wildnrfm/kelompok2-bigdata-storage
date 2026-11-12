@@ -3,7 +3,7 @@
 Perbandingan tiga penyimpanan untuk **katalog metadata** dataset **Sen12Landslides** (inventaris longsor): **MongoDB** (indeks 2dsphere), **PostgreSQL/PostGIS** (indeks GiST),
 dan baseline **HDFS + Parquet** yang dibaca Spark SQL (tanpa indeks spasial). Kita menyimpan atribut, **titik pusat**, dan **kotak pembatas** tiap poligon (74.956 poligon, 16 lokasi) beserta 4.392 patch
 citra; bukan poligon dan bukan citranya (170,5 GB). Data diperbesar secara simulasi menjadi **S1** (asli), **S10**, dan **S100** (7.495.600 anotasi), lalu diukur dengan enam kueri W1 sampai W6,
-plus waktu muat, waktu indeks, dan ukuran di disk (W7, W8). Hipotesis H1 sampai H5 di [baca-dulu/KONTRAK.md](baca-dulu/KONTRAK.md) adalah **dugaan awal yang belum diuji**.
+plus waktu muat, waktu indeks, dan ukuran di disk (W7, W8). Hipotesis H1 sampai H5 di [baca-dulu/KONTRAK.md](baca-dulu/KONTRAK.md) sudah diuji; hasilnya di [docs/penjelasan_lengkap.md](docs/penjelasan_lengkap.md) (H1 diterima sebagian, H2 diterima, H3 ditolak sebagian, H4 diterima sebagian, H5 diterima dengan catatan).
 
 ## Mulai dari sini
 
@@ -19,22 +19,24 @@ plus waktu muat, waktu indeks, dan ukuran di disk (W7, W8). Hipotesis H1 sampai 
 
 ## Status (Wildan memperbarui setelah tiap Sinkron)
 
-- [ ] #2 Paket awal, data mentah, dan S1 terbukti cocok; di GitHub
+Tanda `[x]` dipasang bila ada jejaknya di repo (hasil di `results/`, wasit di `bench/benar/`, dokumen di `docs/`). Butir tanpa jejak di repo dicentang Wildan sendiri.
+
+- [x] #2 Paket awal, data mentah, dan S1 terbukti cocok; di GitHub
 - [ ] #3 sampai #5 Alat terpasang, clone dan latihan Git, spesifikasi laptop (semua)
 - [ ] #7 Kickoff
 - [ ] #8 S1 di laptop Syuep cocok dengan checksum
-- [ ] #9 Docker MongoDB, #10 Docker PostGIS, #12 Docker HDFS dan Spark
-- [ ] #11 Harness, 100 titik tetap, wasit jawaban benar
-- [ ] #13 S1 di MongoDB, #14 S1 di PostGIS, #15 Parquet S1 di HDFS
-- [ ] #16 S10 dan S100 dengan `CHECKSUMS.txt`
-- [ ] #17 W3 di tiga penyimpanan: jumlah hasil sama dan cocok dengan wasit
+- [x] #9 Docker MongoDB, #10 Docker PostGIS, #12 Docker HDFS dan Spark
+- [x] #11 Harness, 100 titik tetap, wasit jawaban benar
+- [x] #13 S1 di MongoDB, #14 S1 di PostGIS, #15 Parquet S1 di HDFS
+- [x] #16 S10 dan S100 dengan `CHECKSUMS.txt`
+- [x] #17 W3 di tiga penyimpanan: jumlah hasil sama dan cocok dengan wasit (S1)
 - [ ] #18 SINKRON 1
 - [ ] #19 sampai #24 Dokumen rancangan, slide pitching, tinjau silang, latihan (SINKRON 2)
-- [ ] #25 W1 sampai W6 benar di S1 di ketiganya
-- [ ] #26 S10 dan S100 termuat di ketiganya (laptop uji)
-- [ ] #27 W1 sampai W8, E1, E2 dijalankan
-- [ ] #28 Uji silang jumlah hasil di S100
-- [ ] #29 Tabel, grafik, hipotesis H1 sampai H5
+- [x] #25 W1 sampai W6 benar di S1 di ketiganya (`compare_counts.py` dengan wasit: semua cocok)
+- [x] #26 S10 dan S100 termuat di ketiganya (laptop uji)
+- [ ] #27 W1 sampai W8, E1, E2 dijalankan (W7 belum lengkap: waktu muat dan waktu indeks S100 belum tercatat; ukuran Parquet belum ada berkas ukurnya)
+- [x] #28 Uji silang jumlah hasil di S10 dan S100 (`results/uji_silang_S10_S100.txt`; satu selisih diketahui: S100 W2 titik 19)
+- [x] #29 Tabel, grafik, hipotesis H1 sampai H5 (`docs/penjelasan_lengkap.md`)
 - [ ] #30 Laporan dan slide hasil
 - [ ] #31 QA akhir dan kumpul di SIDIA
 
@@ -63,6 +65,6 @@ Lihat [TEAM.md](TEAM.md). Ubah **hanya folder milikmu**; `results/` boleh diisi 
 
 ## Atribusi dan lisensi data
 
-Dataset: Höhn dkk. (2025), *Sen12Landslides*, Scientific Data 12:1772; DOI dataset 10.57967/hf/5883; lisensi **CC BY 4.0**.
-Inventaris berasal dari Ferrario dkk. (2023), Emberson dkk. (2022), Belair dkk. (2022), dan Kirschbaum dkk. (2010, 2015).
+Dataset: Höhn, Heidler, Behling, dan Zhu (2025), *A Spatio-Temporal Dataset for Satellite-Based Landslide Detection* (Sen12Landslides), Scientific Data 12:1772; DOI artikel 10.1038/s41597-025-06167-2; DOI dataset 10.57967/hf/5883; lisensi **CC BY 4.0**.
+Anotasi berasal dari Ferrario dkk. (2023), Höhn dkk. (2025), Emberson dkk. (2022), Belair dkk. (2022), dan Kirschbaum dkk. (2010, 2015).
 Berkas hasil turunan (S10 dan S100) adalah **simulasi untuk uji beban penyimpanan**, bukan data ilmiah.

@@ -407,6 +407,23 @@ def uji_bandingkan_tiga_dan_beda():
         csv.writer(f, lineterminator="\n").writerows(baris)
     kode, k = bandingkan("W2", "S1", [hasil[("mongodb", "W2", "S1")], rusak])
     harus(kode == 1 and "Ada 1 kueri yang beda" in k, "selisih satu kueri tidak terdeteksi:\n" + k[-400:])
+    # --titik-maks: selisih di atas batas tidak dihitung, selisih di dalam batas tetap terdeteksi
+    asal2 = list(csv.reader(open(hasil[("postgis", "W2", "S1")], encoding="utf-8", newline="")))
+    awal2 = min(int(r[3]) for r in asal2[1:])
+    j = max((n for n, r in enumerate(asal2[1:], 1) if int(r[3]) == awal2 and int(r[7]) >= 0),
+            key=lambda n: int(asal2[n][5]))
+    q_akhir = int(asal2[j][5])
+    asal2[j][7] = str(int(asal2[j][7]) + 1)
+    rusak_akhir = l.tmp / "rusak_postgis_W2_akhir.csv"
+    with open(rusak_akhir, "w", encoding="utf-8", newline="") as f:
+        csv.writer(f, lineterminator="\n").writerows(asal2)
+    kode, k = bandingkan("W2", "S1", [hasil[("mongodb", "W2", "S1")], rusak_akhir])
+    harus(kode == 1 and "Ada 1 kueri yang beda" in k, "selisih di kueri terakhir tidak terdeteksi:\n" + k[-400:])
+    kode, k = bandingkan("W2", "S1", [hasil[("mongodb", "W2", "S1")], rusak_akhir, "--titik-maks", q_akhir - 1])
+    harus(kode == 0 and ("Hanya kueri_id 1 sampai %d" % (q_akhir - 1)) in k and "Semua jumlah hasil sama" in k,
+          "--titik-maks harus membuang selisih di atas batas:\n" + k[-400:])
+    kode, k = bandingkan("W2", "S1", [hasil[("mongodb", "W2", "S1")], rusak_akhir, "--titik-maks=%d" % q_akhir])
+    harus(kode == 1 and "Ada 1 kueri yang beda" in k, "--titik-maks harus tetap mendeteksi selisih di dalam batas:\n" + k[-400:])
     # beban kerja berbeda dicampur: ditolak (kode 2)
     kode, k = bandingkan("W2", "S1", [hasil[("mongodb", "W2", "S1")], hasil[("mongodb", "W3", "S1")]])
     harus(kode == 2, "campuran beban kerja harus ditolak")
@@ -454,6 +471,19 @@ def uji_ringkasan():
     tanpa = next(r for r in rs if r["varian"] == "tanpa-indeks")
     harus(float(tanpa["median_ms"]) >= 1000 > 10 * float(biasa["median_ms"]),
           "median varian bercampur dengan median biasa: %s vs %s" % (tanpa["median_ms"], biasa["median_ms"]))
+    # --titik-maks: hanya kueri_id sampai N pada skala di --titik-skala; skala lain tidak disentuh
+    semua = list(csv.DictReader(open(asal, encoding="utf-8", newline="")))
+    jalankan_main(summarize, [str(asal), "--titik-maks", "2", "--titik-skala", "S1"])
+    rs = list(csv.DictReader(open(l.hasil / "ringkasan.csv", encoding="utf-8", newline="")))
+    harus(len(rs) == 1 and int(rs[0]["kueri_n"]) == sum(
+        1 for r in semua if int(r["kueri_id"]) <= 2 and r["jumlah_hasil"].strip() != "-1"),
+        "--titik-maks 2 pada S1 harus membuang kueri_id > 2: " + str([r["kueri_n"] for r in rs]))
+    jalankan_main(summarize, [str(asal), "--titik-maks=2"])
+    rs = list(csv.DictReader(open(l.hasil / "ringkasan.csv", encoding="utf-8", newline="")))
+    harus(len(rs) == 1 and int(rs[0]["kueri_n"]) == sum(1 for r in semua if r["jumlah_hasil"].strip() != "-1"),
+          "bawaan --titik-skala hanya S100: S1 tidak boleh berubah: " + str([r["kueri_n"] for r in rs]))
+    jalankan_main(summarize, [str(p) for p in sorted(l.hasil.glob("*.csv"))
+                              if p.name not in ("ringkasan.csv", "banding.csv")])
 
 
 def uji_catat():

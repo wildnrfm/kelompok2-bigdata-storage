@@ -178,8 +178,11 @@ menjawab pertanyaan yang sama). Satu "kueri" = satu titik dari `bench/points.jso
 | W10 | uji kegagalan (matikan DataNode, dst.) | masing-masing | **belum ada skrip** (Tugas Tengah Semester, opsional) |
 
 - Semua perbandingan memakai batas tertutup. Batas jendela **digeser setengah langkah** dari kisi 1e-7° tempat semua koordinat
-  data berada, jadi tidak ada titik tepat di tepi jendela: MongoDB (bola), PostGIS dan Spark (bidang datar) **harus** memberi
-  jumlah sama persis. Selisih berarti ada yang salah, bukan efek tepi.
+  data berada, jadi tidak ada titik tepat di tepi jendela: MongoDB (bola), PostGIS dan Spark (bidang datar) **seharusnya** memberi
+  jumlah sama persis. Selisih biasanya berarti ada yang salah, bukan efek tepi.
+  **Satu pengecualian teramati** (`results/uji_silang_S10_S100.txt`): S100 W2 titik 19, MongoDB 1.401 dan PostGIS/Spark 1.400.
+  Selisihnya satu anotasi yang berjarak sekitar 5 mm di luar tepi jendela, jadi margin 5e-8° tidak cukup bagi MongoDB di S100.
+  Dugaannya toleransi sel S2 di tepi jendela (belum dibuktikan). Selisih lain tetap dianggap salah.
 - `bench/points.json` (dibuat `python bench/make_points.py` dari `data/out/s1/annotations.csv`, seed 20261023, **di-commit**):
   `{"seed", "parameter", "points": [{id, lon, lat, date_from, date_to, event_type, inside, ann_id, location}]}`.
   100 titik: 70 "di dalam" (titik pusat anotasi nyata yang punya `event_date`, dipilih bergilir menurut 16 lokasi,
