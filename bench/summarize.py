@@ -5,8 +5,14 @@
 Cara pakai (dari akar repo, PowerShell):
   python bench/summarize.py                      semua results/*.csv (kecuali ringkasan)
   python bench/summarize.py results/A.csv ...    hanya berkas yang disebut
+  python bench/summarize.py --titik-maks 20      S100 hanya kueri_id 1 sampai 20 (lihat di bawah)
 Hasil dicetak dan ditulis ke results/ringkasan.csv dan results/banding.csv
 (keduanya bisa dibuka di Excel atau Sheets).
+
+--titik-maks N membuang baris dengan kueri_id > N pada skala di --titik-skala (bawaan S100;
+bisa lebih dari satu, pisahkan dengan koma). Rancangan S100 memakai 20 titik pertama, tetapi
+sebagian berkas S100 memuat 100 titik; tanpa opsi ini median S100 bercampur dua himpunan titik
+yang berbeda. Skala lain tidak disentuh. Bisa dipadukan dengan daftar berkas.
 
 Satu baris ringkasan = satu kelompok: penyimpanan, beban_kerja, skala, cold_warm, konkurensi, varian.
   konkurensi : dari kolom catatan bila berbentuk konkurensi=N (W1 banyak klien), selain itu kosong
@@ -58,17 +64,39 @@ def varian(catatan):
     return m.group(1) if m else ""
 
 
-def baca(jalur, grup):
+def ambil_opsi(arg, nama):
+    """Ambil '--nama N' atau '--nama=N' dari arg -> (nilai atau None, sisa arg)."""
+    sisa, nilai, i = [], None, 0
+    while i < len(arg):
+        a = arg[i]
+        if a == nama:
+            if i + 1 >= len(arg):
+                raise SystemExit("%s butuh nilai." % nama)
+            nilai, i = arg[i + 1], i + 2
+        elif a.startswith(nama + "="):
+            nilai, i = a.split("=", 1)[1], i + 1
+        else:
+            sisa.append(a)
+            i += 1
+    return nilai, sisa
+
+
+def baca(jalur, grup, batas=None):
+    """batas: (titik_maks, {skala}) atau None. Baris pada skala itu dengan kueri_id > titik_maks dilewati."""
     with open(jalur, encoding="utf-8", newline="") as f:
         baris = list(csv.DictReader(f))
     if not baris:
         print("LEWAT %s: kosong" % jalur)
         return
     kurang = [k for k in WAJIB if k not in baris[0]]
+    if batas and "kueri_id" not in baris[0]:
+        kurang.append("kueri_id")
     if kurang:
         print("LEWAT %s: kolom tidak ada: %s" % (jalur, ", ".join(kurang)))
         return
     for b in baris:
+        if batas and b["skala"] in batas[1] and int(b["kueri_id"]) > batas[0]:
+            continue
         kunci = (b["penyimpanan"], b["beban_kerja"], b["skala"], b["cold_warm"],
                  konkurensi(b.get("catatan")), varian(b.get("catatan")))
         g = grup.setdefault(kunci, {"waktu": [], "ulangan": {}, "berkas": set(), "galat": 0})
@@ -109,6 +137,19 @@ def banding(grup):
 
 def main(argv=None):
     arg = sys.argv[1:] if argv is None else list(argv)
+    maks, arg = ambil_opsi(arg, "--titik-maks")
+    skala_batas, arg = ambil_opsi(arg, "--titik-skala")
+    batas = None
+    if maks is not None:
+        try:
+            n = int(maks)
+        except ValueError:
+            n = 0
+        if n < 1:
+            raise SystemExit("--titik-maks butuh bilangan bulat >= 1, misalnya --titik-maks 20")
+        batas = (n, {s.strip() for s in (skala_batas or "S100").split(",") if s.strip()})
+    elif skala_batas is not None:
+        raise SystemExit("--titik-skala hanya dipakai bersama --titik-maks.")
     folder = RESULTS
     if arg:
         berkas = [Path(a) for a in arg]
@@ -120,7 +161,7 @@ def main(argv=None):
         raise SystemExit("Tidak ada berkas hasil di %s" % folder)
     grup = {}
     for jalur in berkas:
-        baca(jalur, grup)
+        baca(jalur, grup, batas)
     grup = {k: g for k, g in grup.items() if g["waktu"] or g["galat"]}
     if not grup:
         raise SystemExit("Tidak ada data yang bisa diringkas.")
@@ -163,6 +204,9 @@ def main(argv=None):
         print("%-5s %-5s %-5s %4s %-12s  %10s %10s %10s  %-8s %6s" % (
             b[0], b[1], b[2], b[3] or "-", b[4] or "-", b[5] or "-", b[6] or "-", b[7] or "-", b[8] or "-", b[9] or "-"))
     print()
+    if batas:
+        print("Pembatasan titik: skala %s hanya kueri_id 1 sampai %d (--titik-maks)."
+              % (",".join(sorted(batas[1])), batas[0]))
     print("Tertulis: results/ringkasan.csv (%d kelompok) dan results/banding.csv (%d baris), dari %d berkas"
           % (len(baris), len(bb), len(berkas)))
     if any(g["galat"] for g in grup.values()):
