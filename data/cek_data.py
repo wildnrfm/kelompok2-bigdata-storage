@@ -90,7 +90,7 @@ def periksa_raw(tulis, raw=RAW_DIR):
         print("Belum ada %s. (Wildan menulisnya sekali dengan: python data/cek_data.py --raw --tulis)" % cs)
         return 1
     harap = {}
-    for baris in cs.read_text(encoding="utf-8").splitlines():
+    for baris in cs.read_text(encoding="utf-8-sig").splitlines():
         if baris.strip():
             h, nama = baris.split(None, 1)
             harap[nama.strip()] = h
