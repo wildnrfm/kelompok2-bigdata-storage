@@ -1,0 +1,115 @@
+Uji silang jumlah hasil, S10 dan S100: MongoDB, PostGIS, dan Spark saling dibandingkan.
+
+Dibuat 2026-11-11 dengan bench/compare_counts.py pada berkas warm tanpa varian
+results/20261106_<penyimpanan>_<beban>_<skala>.csv (ulangan pertama tiap kueri_id).
+Wasit bench/benar/ baru tersedia untuk S1, jadi di sini tiga penyimpanan dibandingkan satu sama
+lain (--tanpa-wasit). S100 dibandingkan pada titik 1 sampai 20 (--titik-maks 20): rancangan S100
+memakai 20 titik pertama, tetapi berkas MongoDB W1 sampai W3 dan PostGIS W1 memuat 100 titik.
+
+Cara mengulang, dari akar repo (contoh W2 S100):
+  python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W2_S100.csv results/20261106_postgis_W2_S100.csv results/20261106_spark_W2_S100.csv
+
+Ringkasan (cocok dari total kueri):
+  S10  W1   100 dari 100
+  S10  W2   100 dari 100
+  S10  W3   100 dari 100
+  S10  W4   100 dari 100
+  S10  W5     1 dari   1
+  S10  W6     1 dari   1
+  S100 W1    20 dari  20
+  S100 W2    19 dari  20   <- ada selisih
+  S100 W3    20 dari  20
+  S100 W4    20 dari  20
+  S100 W5     1 dari   1
+  S100 W6     1 dari   1
+
+Selisih yang ada: S100 W2 titik 19, MongoDB 1401 dan PostGIS/Spark 1400. Selisihnya satu anotasi
+yang berjarak sekitar 5 mm di luar tepi jendela kueri; dugaannya toleransi sel S2 MongoDB di tepi
+jendela (belum dibuktikan). Selain itu semua jumlah hasil sama.
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W1_S10.csv results/20261106_postgis_W1_S10.csv results/20261106_spark_W1_S10.csv
+Perbandingan W1 S10: mongodb vs postgis vs spark
+Cocok: 100 dari 100 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W2_S10.csv results/20261106_postgis_W2_S10.csv results/20261106_spark_W2_S10.csv
+Perbandingan W2 S10: mongodb vs postgis vs spark
+Cocok: 100 dari 100 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W3_S10.csv results/20261106_postgis_W3_S10.csv results/20261106_spark_W3_S10.csv
+Perbandingan W3 S10: mongodb vs postgis vs spark
+Cocok: 100 dari 100 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W4_S10.csv results/20261106_postgis_W4_S10.csv results/20261106_spark_W4_S10.csv
+Perbandingan W4 S10: mongodb vs postgis vs spark
+Cocok: 100 dari 100 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W5_S10.csv results/20261106_postgis_W5_S10.csv results/20261106_spark_W5_S10.csv
+Perbandingan W5 S10: mongodb vs postgis vs spark
+Cocok: 1 dari 1 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit results/20261106_mongodb_W6_S10.csv results/20261106_postgis_W6_S10.csv results/20261106_spark_W6_S10.csv
+Perbandingan W6 S10: mongodb vs postgis vs spark
+Cocok: 1 dari 1 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W1_S100.csv results/20261106_postgis_W1_S100.csv results/20261106_spark_W1_S100.csv
+Perbandingan W1 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 20 dari 20 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W2_S100.csv results/20261106_postgis_W2_S100.csv results/20261106_spark_W2_S100.csv
+Perbandingan W2 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 19 dari 20 kueri.
+
+kueri_id    mongodb    postgis      spark
+      19       1401       1400       1400
+
+Ada 1 kueri yang beda. Jendela sudah digeser dari tepi, jadi selisih biasanya berarti ada yang salah.
+Cek berurutan: (1) skala yang dimuat sama di semua penyimpanan, (2) muat ulang dari
+data/out yang sama, (3) indeks sudah dibuat, (4) '-' artinya kueri itu tidak ada di berkas,
+(5) satu-satunya selisih tepi yang pernah teramati: MongoDB lebih banyak 1 pada S100 W2
+titik 19 (dugaan toleransi sel S2); selisih lain dianggap salah.
+Bila tetap beda: tulis [BLOKIR] di grup dan tempel tabel di atas.
+[kode keluar 1]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W3_S100.csv results/20261106_postgis_W3_S100.csv results/20261106_spark_W3_S100.csv
+Perbandingan W3 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 20 dari 20 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W4_S100.csv results/20261106_postgis_W4_S100.csv results/20261106_spark_W4_S100.csv
+Perbandingan W4 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 20 dari 20 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W5_S100.csv results/20261106_postgis_W5_S100.csv results/20261106_spark_W5_S100.csv
+Perbandingan W5 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 1 dari 1 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
+
+$ python bench/compare_counts.py --tanpa-wasit --titik-maks 20 results/20261106_mongodb_W6_S100.csv results/20261106_postgis_W6_S100.csv results/20261106_spark_W6_S100.csv
+Perbandingan W6 S100: mongodb vs postgis vs spark
+Hanya kueri_id 1 sampai 20 yang dibandingkan (--titik-maks).
+Cocok: 1 dari 1 kueri.
+Semua jumlah hasil sama.
+[kode keluar 0]
