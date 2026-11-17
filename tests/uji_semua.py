@@ -6,7 +6,8 @@ Cara pakai (dari akar repo, PowerShell; hanya Python bawaan):
   python tests/uji_semua.py              uji cepat (sekitar 1 menit)
   python tests/uji_semua.py --penuh      termasuk konversi data berbentuk laporan asli (75 ribu poligon)
   python tests/uji_semua.py --simpan     jangan hapus folder sementara (untuk diperiksa)
-  python tests/uji_semua.py -k mongo     hanya uji yang namanya memuat 'mongo'
+  python tests/uji_semua.py -k mongo     hanya uji yang namanya memuat 'mongo' (ditambah tiga uji
+                                         penyiap data: konversi_kecil, generator, titik_uji)
 
 Yang dibuktikan: kode berjalan dari ujung ke ujung, nama kolom dan definisi kueri W1 sampai W6
 konsisten, dan MongoDB/PostGIS/Spark TIRUAN memberi jumlah yang sama dengan wasit
@@ -31,7 +32,7 @@ from pathlib import Path
 
 PAKET = Path(__file__).resolve().parent.parent
 STUBS = PAKET / "tests" / "stubs"
-for sub in ("tests", "bench", "data", "mongodb", "hdfs-parquet"):
+for sub in ("tests", "bench", "data", "mongodb", "hdfs-parquet", "analitik"):
     sys.path.insert(0, str(PAKET / sub))
 
 try:
@@ -381,6 +382,293 @@ def uji_spark_tiruan():
         harness.subprocess.call = asli
 
 
+def uji_analitik_sql_dan_acuan():
+    """Tahap analitik: skema sama dengan csv_to_parquet; kueri Spark SQL (di SQLite) = hitungan Python murni."""
+    import csv_to_parquet
+    import cocokkan
+    import kueri_analitik as ka
+    import referensi
+    import uji_sql
+    l = lingkungan()
+    harus(ka.SKEMA_ANOTASI == [tuple(x) for x in csv_to_parquet.KOLOM_ANOTASI],
+          "SKEMA_ANOTASI (analitik/kueri_analitik.py) beda dari KOLOM_ANOTASI (hdfs-parquet/csv_to_parquet.py)")
+    harus(ka.SKEMA_PATCH == [tuple(x) for x in csv_to_parquet.KOLOM_PATCH],
+          "SKEMA_PATCH (analitik/kueri_analitik.py) beda dari KOLOM_PATCH (hdfs-parquet/csv_to_parquet.py)")
+    harus(len(ka.NAMA_ANALISIS) == len(set(ka.NAMA_ANALISIS)) == 14, "harus ada 14 tabel analitik bernama unik")
+    for skala, folder in (("S1", l.s1), ("S10", l.s10)):
+        log = []
+        ok, buruk, sel = uji_sql.uji(str(folder), cetak=log.append)
+        harus(buruk == 0 and ok == len(ka.ANALISIS), "kueri di SQLite beda dari hitungan Python (%s):\n%s" % (skala, "\n".join(log[-14:])))
+        harus(sel > 300, "terlalu sedikit sel yang dibandingkan: %d" % sel)
+    # bagian asli S10 (sim_batch = 0) harus memberi tabel yang sama dengan S1
+    a = referensi.hitung(str(l.s1))
+    b = referensi.hitung(str(l.s10), hanya_asli=True)
+    for nama, judul, kunci, sql in ka.ANALISIS:
+        ta = [[ka.format_nilai(x) for x in r] for r in a[nama][1]]
+        tb = [[ka.format_nilai(x) for x in r] for r in b[nama][1]]
+        beda, n = cocokkan.bandingkan_tabel(nama, a[nama][0], ta, b[nama][0], tb, kunci)
+        harus(not beda, "S10 hanya-asli beda dari S1 di %s: %s" % (nama, "; ".join(beda[:2])))
+
+
+def uji_analitik_data_tepi():
+    """Kueri analitik = hitungan Python pada data yang penuh kasus aneh (NULL, spasi, seri, batas angka)."""
+    import buat_data_uji
+    import kueri_analitik as ka
+    import referensi
+    import uji_sql
+    l = lingkungan()
+    folder = l.tmp / "tepi"
+    buat_data_uji.buat_tepi(str(folder), ka.SKEMA_ANOTASI, ka.SKEMA_PATCH)
+    log = []
+    ok, buruk, sel = uji_sql.uji(str(folder), cetak=log.append)
+    harus(buruk == 0 and ok == len(ka.ANALISIS), "data tepi: kueri beda dari hitungan Python:\n" + "\n".join(log[-14:]))
+    # pastikan data tepinya memang mengenai kasus yang dimaksud (bukan lolos karena kosong)
+    h = referensi.hitung(str(folder))
+    q2 = dict(h["q2_pemeriksaan"][1])
+    for nama in ("ann_id_ganda", "area_kosong", "area_nol_atau_negatif", "bbox_terbalik", "conf_di_luar_0_1",
+                 "jenis_kejadian_kosong", "koordinat_di_luar_rentang", "patch_id_ganda",
+                 "patch_inventaris_tanpa_anotasi", "piksel_anotasi_negatif", "pusat_di_luar_bbox",
+                 "tanpa_tanggal_apa_pun", "urutan_tanggal_salah"):
+        harus(q2[nama] > 0, "data tepi tidak mengenai pemeriksaan %s" % nama)
+    sel_terpadat = [r[2] for r in h["a5a_sel_terpadat"][1]]
+    harus(len(set(sel_terpadat)) < len(sel_terpadat), "data tepi harus punya nilai seri pada sel terpadat")
+    harus(any(r[0] is None for r in h["a1_tahun_jenis"][1]), "data tepi harus punya kelompok tahun kosong")
+    harus(any(r[0] < 0 for r in h["a5a_sel_terpadat"][1]), "data tepi harus punya sel bernomor negatif")
+    # kenari: data tepi harus cukup tajam sehingga perubahan kecil pada kueri ketahuan (jangan dilemahkan)
+    asli_analisis, asli_kaya = list(ka.ANALISIS), ka.SQL_PERKAYA
+    kenari = [
+        ("SQL_PERKAYA", "center_lat >= 0", "center_lat > 0"),                                    # lintang tepat 0
+        ("SQL_PERKAYA", "floor(center_lon * 10) AS gx", "CAST(center_lon * 10 AS INTEGER) AS gx"),  # floor vs potong
+        ("SQL_PERKAYA", "COALESCE(NULLIF(TRIM(inventory), ''),", "COALESCE(NULLIF(inventory, ''),"),  # teks berisi spasi
+        ("a3_lokasi", "percentile(area, 0.5)", "percentile(area, 0.51)"),                        # persentil
+        ("a5a_sel_terpadat", "ORDER BY n DESC, gx, gy", "ORDER BY n DESC, gx DESC, gy"),         # seri di batas 20 sel
+        ("a7_waktu_kualitas", "percentile(selang_pasca, 0.5)", "percentile(selang_pra, 0.5)"),   # pra dan pasca
+        ("q1_kolom_kosong", "TRIM(author) = ''", "author = ''"),                                 # penulis hanya spasi
+        ("a8_hari_terpadat", "ORDER BY n DESC, event_date", "ORDER BY n DESC, event_date DESC"),  # seri di batas 15 hari
+        ("q2_pemeriksaan", "center_lat > bbox_max_lat", "center_lat >= bbox_max_lat"),           # pusat tepat di sudut
+        ("q2_pemeriksaan", "center_lon > 180", "center_lon > 179"),                              # bujur tepat 180
+        ("a3b_lokasi_tanggal", "min(event_date) AS tanggal_awal", "max(event_date) AS tanggal_awal"),  # tanggal awal
+        ("a3b_lokasi_tanggal", "WHERE event_date IS NOT NULL", ""),                              # baris tanpa tanggal
+    ]
+    try:
+        for sasaran, lama, baru in kenari:
+            ka.ANALISIS, ka.SQL_PERKAYA = list(asli_analisis), asli_kaya
+            if sasaran == "SQL_PERKAYA":
+                harus(lama in asli_kaya, "kenari usang: %s tidak ada di SQL_PERKAYA" % lama)
+                ka.SQL_PERKAYA = asli_kaya.replace(lama, baru)
+            else:
+                i = [k for k, a in enumerate(asli_analisis) if a[0] == sasaran][0]
+                harus(lama in asli_analisis[i][3], "kenari usang: %s tidak ada di %s" % (lama, sasaran))
+                a = asli_analisis[i]
+                ka.ANALISIS[i] = (a[0], a[1], a[2], a[3].replace(lama, baru))
+            ok2, buruk2, sel2 = uji_sql.uji(str(folder), cetak=lambda x: None)
+            harus(buruk2 > 0, "data tepi tidak mendeteksi perubahan kueri di %s: %s -> %s" % (sasaran, lama, baru))
+    finally:
+        ka.ANALISIS, ka.SQL_PERKAYA = asli_analisis, asli_kaya
+
+
+def uji_analitik_pembanding_mendeteksi_selisih():
+    import cocokkan
+    import kueri_analitik as ka
+    import referensi
+    l = lingkungan()
+    ref = l.tmp / "ana_pembanding_ref"
+    referensi.tulis_semua(referensi.hitung(str(l.s1)), str(ref))
+    lap, ok, buruk, sel = cocokkan.bandingkan_folder(str(ref), str(ref))
+    harus(buruk == 0 and ok == len(ka.ANALISIS), "folder yang sama harus cocok dengan dirinya:\n" + "\n".join(lap[-6:]))
+
+    def salin(nama):
+        d = l.tmp / nama
+        shutil.rmtree(d, ignore_errors=True)
+        shutil.copytree(ref, d)
+        return d
+
+    def ubah(d, berkas, f):
+        baris = list(csv.reader(open(d / (berkas + ".csv"), encoding="utf-8", newline="")))
+        f(baris)
+        with open(d / (berkas + ".csv"), "w", encoding="utf-8", newline="") as fh:
+            csv.writer(fh, lineterminator="\n").writerows(baris)
+
+    # urutan baris tidak boleh berpengaruh (disejajarkan menurut kunci)
+    d = salin("ana_urut")
+    ubah(d, "a1_tahun_jenis", lambda b: b.__setitem__(slice(1, None), b[:0:-1]))
+    lap, ok, buruk, sel = cocokkan.bandingkan_folder(str(d), str(ref))
+    harus(buruk == 0, "urutan baris dibalik harus tetap cocok:\n" + "\n".join(lap[:6]))
+    # selisih desimal sangat kecil (di bawah toleransi) lolos; selisih 1e-6 relatif tidak
+    kolom, baris = ka.baca_csv(str(ref / "a4a_area_jenis.csv"))
+    i = kolom.index("p50")
+    d = salin("ana_kecil")
+    ubah(d, "a4a_area_jenis", lambda b: b[1].__setitem__(i, repr(float(b[1][i]) * (1 + 1e-12))))
+    harus(cocokkan.bandingkan_folder(str(d), str(ref))[2] == 0, "selisih 1e-12 harus lolos")
+    d = salin("ana_besar")
+    ubah(d, "a4a_area_jenis", lambda b: b[1].__setitem__(i, repr(float(b[1][i]) * (1 + 1e-6))))
+    lap, ok, buruk, sel = cocokkan.bandingkan_folder(str(d), str(ref))
+    harus(buruk == 1 and any("BEDA" in x and "a4a_area_jenis" in x for x in lap), "selisih 1e-6 harus terdeteksi")
+    # satu jumlah bertambah satu, sel kosong vs berisi, baris hilang, kolom berubah nama, berkas hilang
+    d = salin("ana_jumlah")
+    ubah(d, "a3_lokasi", lambda b: b[1].__setitem__(3, str(int(b[1][3]) + 1)))
+    harus(cocokkan.bandingkan_folder(str(d), str(ref))[2] == 1, "selisih jumlah satu harus terdeteksi")
+    d = salin("ana_kosong")
+    ubah(d, "a1_tahun_jenis", lambda b: b[2].__setitem__(0, "2099"))
+    harus(cocokkan.bandingkan_folder(str(d), str(ref))[2] == 1, "kunci yang berubah harus terdeteksi")
+    d = salin("ana_hilang_baris")
+    ubah(d, "a2_bulan_hemisfer", lambda b: b.pop(3))
+    harus(cocokkan.bandingkan_folder(str(d), str(ref))[2] == 1, "baris yang hilang harus terdeteksi")
+    d = salin("ana_kolom")
+    ubah(d, "a6_patch_inventaris", lambda b: b[0].__setitem__(1, "jumlah_patch"))
+    harus(cocokkan.bandingkan_folder(str(d), str(ref))[2] == 1, "nama kolom yang berubah harus terdeteksi")
+    d = salin("ana_berkas")
+    os.remove(d / "a8_hari_terpadat.csv")
+    lap, ok, buruk, sel = cocokkan.bandingkan_folder(str(d), str(ref))
+    harus(buruk == 1 and any("HILANG" in x for x in lap), "berkas yang hilang harus terdeteksi")
+    # lewat baris perintah: kode keluar 0 bila cocok, 1 bila beda
+    kode, k = sub("analitik/cocokkan.py", "--hasil", ref, "--acuan", ref)
+    harus(kode == 0 and "SEMUA TABEL COCOK" in k, k[-300:])
+    kode, k = sub("analitik/cocokkan.py", "--hasil", d, "--acuan", ref, ok=(1,))
+    harus(kode == 1 and "ADA SELISIH" in k, k[-300:])
+
+
+def uji_analitik_acuan_lengkap():
+    """Folder acuan analitik/referensi_S*: 14 tabel, kolom sama dengan S1, jumlah baris sesuai skala;
+    pembanding memilih acuan dari nama folder hasil."""
+    import cocokkan
+    import kueri_analitik as ka
+    l = lingkungan()
+    folder = sorted(p for p in (PAKET / "analitik").glob("referensi_S*") if p.is_dir())
+    harus([p.name for p in folder][:1] == ["referensi_S1"], "analitik/referensi_S1 hilang")
+    nama_berkas = sorted(n + ".csv" for n in ka.NAMA_ANALISIS)
+    kepala_s1 = dict((n, ka.baca_csv(str(folder[0] / (n + ".csv")))[0]) for n in ka.NAMA_ANALISIS)
+    for p in folder:
+        skala = p.name.split("_", 1)[1]
+        harus(skala in ("S1", "S10", "S100"), "folder acuan tidak dikenal: %s" % p.name)
+        harus(sorted(x.name for x in p.glob("*.csv")) == nama_berkas, "%s: daftar berkas bukan 14 tabel analitik" % p.name)
+        for n in ka.NAMA_ANALISIS:
+            kolom, baris = ka.baca_csv(str(p / (n + ".csv")))
+            harus(baris, "%s/%s.csv kosong" % (p.name, n))
+            harus(kolom == kepala_s1[n], "%s/%s.csv: kolom beda dari acuan S1" % (p.name, n))
+        q0 = dict((r[0], r[1]) for r in ka.baca_csv(str(p / "q0_hitung.csv"))[1])
+        faktor = {"S1": 1, "S10": 10, "S100": 100}[skala]       # data nyata (bukan data uji kecil): 74.956 anotasi, 4.392 patch
+        n_ann, n_patch = 74956 * faktor, 4392 * faktor
+        harus(int(q0["anotasi"]) == n_ann and int(q0["patch"]) == n_patch,
+              "%s/q0_hitung.csv: jumlah %s/%s, seharusnya %d/%d" % (p.name, q0["anotasi"], q0["patch"], n_ann, n_patch))
+        harus(int(q0["anotasi_asli_sim0"]) == 74956, "%s: bagian data nyata (sim_batch = 0) harus 74.956" % p.name)
+    # pilihan acuan otomatis dari nama folder hasil
+    harus(cocokkan.skala_acuan(Path("x") / "S10") == "S10" and cocokkan.skala_acuan(Path("x") / "S100") == "S100",
+          "S10 dan S100 harus memakai acuannya sendiri")
+    harus(all(cocokkan.skala_acuan(Path("x") / n) == "S1" for n in ("S1", "S100_asli", "S10_asli", "apa_saja")),
+          "S1, folder _asli, dan nama lain harus memakai acuan S1")
+    harus(cocokkan.acuan_untuk(Path("x") / "S10").endswith("referensi_S10"), "acuan_untuk S10 salah")
+    if (PAKET / "analitik" / "referensi_S10").is_dir():
+        d = l.tmp / "ana_auto" / "S10"
+        shutil.rmtree(d.parent, ignore_errors=True)
+        shutil.copytree(PAKET / "analitik" / "referensi_S10", d)
+        kode, k = sub("analitik/cocokkan.py", "--hasil", d)
+        harus(kode == 0 and "referensi_S10" in k and "SEMUA TABEL COCOK" in k, k[-300:])
+        d2 = l.tmp / "ana_auto2" / "S10"          # isi S1 di folder bernama S10: harus ketahuan
+        shutil.rmtree(d2.parent, ignore_errors=True)
+        shutil.copytree(PAKET / "analitik" / "referensi_S1", d2)
+        kode, k = sub("analitik/cocokkan.py", "--hasil", d2, ok=(1,))
+        harus(kode == 1 and "ADA SELISIH" in k, k[-300:])
+
+
+def uji_analitik_spark_tiruan():
+    """spark_pipeline.py dijalankan di Spark TIRUAN (SQLite): hasilnya harus sama dengan hitungan Python murni."""
+    pakai_stub("pyspark")
+    import pyspark.sql as pss
+    import csv_to_parquet
+    import cocokkan
+    import kueri
+    import kueri_analitik as ka
+    import referensi
+    import ringkas_waktu
+    import spark_pipeline
+    import buat_data_uji
+    l = lingkungan()
+    pasang_kecil()
+    pss.kosongkan()
+    for skala, folder in (("S1", l.s1), ("S10", l.s10)):
+        jalankan_main(csv_to_parquet, ["--scale", skala, "--folder", str(folder)])
+    acuan1, acuan10 = l.tmp / "ana_acuan_s1", l.tmp / "ana_acuan_s10"
+    referensi.tulis_semua(referensi.hitung(str(l.s1)), str(acuan1))
+    referensi.tulis_semua(referensi.hitung(str(l.s10)), str(acuan10))
+
+    def cocok(hasil, acuan, apa):
+        lap, ok, buruk, sel = cocokkan.bandingkan_folder(str(hasil), str(acuan))
+        harus(buruk == 0 and ok == len(ka.ANALISIS), "%s: hasil Spark tiruan beda dari hitungan Python:\n%s" % (apa, "\n".join(lap[-14:])))
+
+    # 1) S1 dengan etl, dua putaran (cold lalu warm)
+    keluar = l.tmp / "ana_spark"
+    out = jalankan_main(spark_pipeline, ["--skala", "S1", "--ulangan", "2", "--keluar", str(keluar)])
+    harus("Putaran 1/2 (cold)" in out and "Putaran 2/2 (warm)" in out, "ringkasan putaran tidak tampil:\n" + out[-500:])
+    cocok(keluar / "S1", acuan1, "S1 etl")
+    # tabel turunan ditulis di folder analitik, BUKAN di folder Parquet mentah (supaya ukuran penyimpanan tidak berubah)
+    kaya = [k for k in pss._HDFS if k.endswith("/s1/annotations_kaya")]
+    harus(len(kaya) == 1 and "/data/sen12ls/analitik/" in kaya[0] and len(pss._HDFS[kaya[0]]) == N_ANOTASI,
+          "tabel turunan salah tempat atau salah isi: %s" % sorted(pss._HDFS))
+    mentah = sorted(k for k in pss._HDFS if "/parquet/" in k)
+    harus(mentah == sorted("hdfs://namenode:8020/data/sen12ls/parquet/%s/%s" % (s, t)
+                           for s in ("s1", "s10") for t in ("annotations", "patches")),
+          "pipeline tidak boleh menulis ke folder Parquet mentah: %s" % mentah)
+    waktu = list(csv.DictReader(open(keluar / "waktu_pemrosesan.csv", encoding="utf-8", newline="")))
+    tahap = ["etl"] + ka.NAMA_ANALISIS + ["ekspor", "total"]
+    harus(len(waktu) == 2 * len(tahap), "berkas waktu harus %d baris, ada %d" % (2 * len(tahap), len(waktu)))
+    harus([w["tahap"] for w in waktu[:len(tahap)]] == tahap, "urutan tahap salah")
+    harus({w["cold_warm"] for w in waktu[:len(tahap)]} == {"cold"} and {w["cold_warm"] for w in waktu[len(tahap):]} == {"warm"},
+          "putaran 1 harus cold dan putaran 2 warm")
+    harus({int(w["n_anotasi"]) for w in waktu} == {N_ANOTASI} and all(float(w["waktu_ms"]) >= 0 for w in waktu), "isi waktu salah")
+    harus(all(w["catatan"] == "" for w in waktu), "catatan harus kosong tanpa pilihan khusus")
+    # 2) tanpa etl: hasil sama, tidak ada tahap etl
+    keluar2 = l.tmp / "ana_spark_tanpa_etl"
+    jalankan_main(spark_pipeline, ["--skala", "S1", "--tanpa-etl", "--keluar", str(keluar2)])
+    cocok(keluar2 / "S1", acuan1, "S1 tanpa etl")
+    w2 = list(csv.DictReader(open(keluar2 / "waktu_pemrosesan.csv", encoding="utf-8", newline="")))
+    harus("etl" not in {w["tahap"] for w in w2} and {w["catatan"] for w in w2} == {"tanpa-etl"}, "mode tanpa-etl salah")
+    # 3) S10 penuh (etl) lalu S10 hanya bagian asli = acuan S1; mode hanya-asli tidak mencatat waktu
+    jalankan_main(spark_pipeline, ["--skala", "S10", "--keluar", str(keluar)])
+    cocok(keluar / "S10", acuan10, "S10")
+    keluar3 = l.tmp / "ana_spark_asli"
+    jalankan_main(spark_pipeline, ["--skala", "S10", "--hanya-asli", "--keluar", str(keluar3)])
+    cocok(keluar3 / "S10_asli", acuan1, "S10 hanya-asli = S1")
+    harus(not (keluar3 / "waktu_pemrosesan.csv").exists(), "mode hanya-asli tidak boleh menulis berkas waktu bawaan")
+    # 4) data tepi lewat Spark tiruan (--force karena jumlahnya bukan harapan skala)
+    tepi = l.tmp / "tepi_spark"
+    buat_data_uji.buat_tepi(str(tepi), ka.SKEMA_ANOTASI, ka.SKEMA_PATCH)
+    pss.kosongkan()
+    jalankan_main(csv_to_parquet, ["--scale", "S1", "--folder", str(tepi)])
+    acuan_tepi = l.tmp / "ana_acuan_tepi"
+    referensi.tulis_semua(referensi.hitung(str(tepi)), str(acuan_tepi))
+    keluar4 = l.tmp / "ana_spark_tepi"
+    jalankan_main(spark_pipeline, ["--skala", "S1", "--force", "--keluar", str(keluar4)])
+    cocok(keluar4 / "S1", acuan_tepi, "data tepi")
+    # 5) penolakan: jumlah baris bukan harapan, dan Parquet belum ada
+    def harus_ditolak(argv, kata):
+        with diam():
+            try:
+                spark_pipeline.main(argv)
+            except SystemExit as e:
+                harus(isinstance(e.code, str) and kata in e.code, "pesan penolakan salah: %r" % (e.code,))
+                return
+        raise Gagal("harus ditolak (%s): %s" % (kata, argv))
+
+    kueri.N_DASAR_ANOTASI = 500
+    try:
+        harus_ditolak(["--skala", "S1", "--keluar", str(l.tmp / "x")], "tidak sama dengan harapan")
+    finally:
+        kueri.N_DASAR_ANOTASI = N_ANOTASI
+    pss.kosongkan()
+    harus_ditolak(["--skala", "S1", "--keluar", str(l.tmp / "x")], "Tidak bisa membaca")
+    harus_ditolak(["--skala", "S1", "--ulangan", "0", "--keluar", str(l.tmp / "x")], "--ulangan minimal 1")
+    # 6) ringkasan waktu: S1 (cold + warm) dan S10 (hanya cold)
+    jalankan_main(ringkas_waktu, ["--waktu", str(keluar / "waktu_pemrosesan.csv"), "--keluar", str(keluar)])
+    rk = list(csv.DictReader(open(keluar / "ringkasan_waktu.csv", encoding="utf-8", newline="")))
+    harus([(r["skala"], r["mode"], r["dasar"]) for r in rk] == [("S1", "etl", "warm"), ("S10", "etl", "cold")],
+          "ringkasan waktu salah: %s" % [(r["skala"], r["mode"], r["dasar"]) for r in rk])
+    harus(rk[1]["rasio_data_vs_S1"] == "10.0" and rk[0]["rasio_data_vs_S1"] == "1.0", "rasio data salah")
+    harus(all(float(r["total_ms"]) > 0 and float(r["anotasi_per_detik"]) > 0 for r in rk), "ringkasan waktu: angka salah")
+    pt = list(csv.DictReader(open(keluar / "waktu_per_tahap.csv", encoding="utf-8", newline="")))
+    harus(len(pt) == 2 * len(tahap), "waktu_per_tahap.csv harus %d baris" % (2 * len(tahap)))
+
+
 def uji_bandingkan_tiga_dan_beda():
     import compare_counts
     l = lingkungan()
@@ -571,6 +859,7 @@ def uji_compose_dan_nama():
     harus("container_name: sen12ls-postgis" in teks["postgis"] and "5433:5432" in teks["postgis"], "compose postgis")
     for n in ("sen12ls-namenode", "sen12ls-datanode1", "sen12ls-datanode2", "sen12ls-spark"):
         harus("container_name: " + n in teks["hdfs-parquet"], "compose hdfs: " + n)
+    harus("../analitik:/analitik:ro" in teks["hdfs-parquet"], "compose hdfs-parquet: ../analitik harus dipasang read-only di /analitik")
     for f, t in teks.items():
         harus("../data:/sen12ls-data:ro" in t, "%s: data harus dipasang read-only di /sen12ls-data" % f)
         harus("\t" not in t, "%s: ada tab di YAML" % f)
@@ -611,11 +900,16 @@ UJI = [
     ("batch_tambahan", uji_batch_tambahan), ("titik_uji", uji_titik), ("wasit", uji_wasit),
     ("mongo_tiruan", uji_mongo_tiruan), ("mongo_banyak_klien_cold", uji_mongo_banyak_klien_dan_cold),
     ("postgis_tiruan", uji_postgis_tiruan), ("spark_tiruan", uji_spark_tiruan),
+    ("analitik_sql_dan_acuan", uji_analitik_sql_dan_acuan), ("analitik_data_tepi", uji_analitik_data_tepi),
+    ("analitik_pembanding", uji_analitik_pembanding_mendeteksi_selisih),
+    ("analitik_acuan_lengkap", uji_analitik_acuan_lengkap),
+    ("analitik_spark_tiruan", uji_analitik_spark_tiruan),
     ("bandingkan", uji_bandingkan_tiga_dan_beda), ("ringkasan", uji_ringkasan), ("catat", uji_catat),
     ("js_dan_sql_referensi", uji_js_dan_sql), ("compose_dan_nama", uji_compose_dan_nama),
 ]
 PENUH = [("konversi_laporan", uji_konversi_laporan)]
 KUNCI_DATA = {"konversi_kecil"}
+PENYIAP_DATA = {"konversi_kecil", "generator", "titik_uji"}   # tetap dijalankan walau dipilih lewat -k
 
 
 def main(argv=None):
@@ -630,7 +924,7 @@ def main(argv=None):
     t_awal = time.time()
     try:
         for nama, f in daftar:
-            if args.filter and args.filter not in nama:
+            if args.filter and args.filter not in nama and nama not in PENYIAP_DATA:
                 continue
             if not prasyarat_ok and nama != "compose_dan_nama" and nama != "js_dan_sql_referensi":
                 print("LEWAT  %s (data uji dasar gagal dibuat)" % nama)

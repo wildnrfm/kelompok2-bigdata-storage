@@ -354,6 +354,107 @@ def buat_kecil(folder, n=300, n_patch=40, seed=5):
     return {"n": n, "n_patch": n_patch, "lokasi": lokasi, "baris": baris}
 
 
+def buat_tepi(folder, skema_anotasi, skema_patch, n=500, n_patch=70, seed=20261116):
+    """annotations.csv dan patches.csv BUATAN yang penuh kasus tepi, untuk uji tahap analitik.
+
+    Isinya: sel kosong di mana-mana, teks yang hanya berisi spasi, tanggal sebagian atau terbalik,
+    baris tanpa tanggal sama sekali, luas pangkat sepuluh / nol / negatif, confidence di luar 0-1,
+    koordinat negatif dan di luar rentang, pusat di luar bbox, bbox terbalik, id ganda, id kosong,
+    inventaris patch tanpa anotasi, dan banyak nilai seri pada urutan 'terpadat'. Tujuannya hanya
+    memeriksa bahwa kueri SQL dan hitungan Python murni sepakat pada kasus-kasus aneh itu.
+    """
+    import csv
+    rnd = random.Random(seed)
+    os.makedirs(folder, exist_ok=True)
+    lokasi = [("LokA", "inv_a", "Rainfall"), ("LokB", "inv_b", "Earthquake"), ("LokC", "", ""),
+              ("LokD", " ", "Hurricane"), ("LokE", "inv_e", " "), ("LokF", "inv_a", "Rainfall")]
+    tanggal = [date(2018, 1, 1) + timedelta(days=d) for d in (0, 0, 0, 5, 40, 400, 400, 800, 1300, 2000)]
+    luas = [None, 0.5, 1.0, 10.0, 999.9, 1000.0, 1000.0, 1234.5678, 5e6, 0.0, -1.0, 100.0, 100.0]
+    luas += [round(rnd.uniform(1, 90000), 3) for _ in range(14)]          # nilai kontinu: median tidak seri
+    conf = [None, 0.0, 0.25, 0.5, 1.0, 1.0, 1.0, 1.5, -0.1]
+    pusat = [(rnd.uniform(-179.5, 179.5), rnd.uniform(-85, 85)) for _ in range(25)]
+    pusat += [(10.04, 45.07), (-61.43, 15.48), (30.0, 0.0), (0.01, 0.01), (-0.04, -0.02), (172.5, -41.0),
+              (-179.97, -89.95)]                                          # termasuk lintang tepat 0 dan negatif kecil
+    bobot = [rnd.choice([1, 1, 2, 3, 8, 20]) for _ in pusat]             # sebaran jumlah per sel lebar
+    penulis = ["Penulis A", "Penulis B", "", "  "]
+
+    def fmt(v):
+        if v is None:
+            return ""
+        if isinstance(v, date):
+            return v.isoformat()
+        return repr(v) if isinstance(v, float) else str(v)
+
+    with open(os.path.join(folder, "annotations.csv"), "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow([nm for nm, _ in skema_anotasi])
+        for i in range(n):
+            lok, inv, jenis = lokasi[i % len(lokasi)]
+            ev = rnd.choice(tanggal + [None])
+            if 300 <= i < 390:
+                ev = date(2030, 1, 1) + timedelta(days=(i - 300) // 3)     # 30 tanggal, masing-masing tepat 3 baris
+            pre = ev - timedelta(days=rnd.choice([1, 7, 7, 30, 600])) if ev and rnd.random() > 0.15 else None
+            post = ev + timedelta(days=rnd.choice([2, 9, 9, 40, 575])) if ev and rnd.random() > 0.15 else None
+            if ev and rnd.random() < 0.05:
+                pre, post = post, pre                       # urutan tanggal terbalik
+            if i % 37 == 0:
+                pre = ev = post = None                      # tanpa tanggal sama sekali
+            if rnd.random() < 0.85:
+                lon0, lat0 = rnd.choices(pusat, bobot)[0]
+                lon, lat = lon0 + rnd.choice([0.0, 0.003, -0.003]), lat0 + rnd.choice([0.0, 0.003, -0.003])
+            else:
+                lon, lat = rnd.uniform(-179, 179), rnd.uniform(-80, 80)
+            if 100 <= i < 280:
+                lon, lat = 50.0 + ((i - 100) // 6) * 0.5, 10.02             # 30 sel 0,1 derajat, masing-masing tepat 6 baris
+            if i % 53 == 0:
+                lon = 190.0                                  # di luar rentang
+            if i % 59 == 0:
+                lat = -95.0
+            if i % 61 == 0:
+                lon = 180.0                                  # tepat di batas (sah)
+            if i % 67 == 0:
+                lon = 179.5
+            if i % 71 == 0:
+                lat = 90.0 if i % 2 else -90.0               # tepat di batas (sah)
+            d = 0.01
+            b = [lon - d, lat - d, lon + d, lat + d]
+            if i % 47 == 0:
+                b = [lon - d, lat - d, lon, lat]             # pusat tepat di sudut bbox (bukan di luar)
+            if i % 41 == 0:
+                b = [lon + d, lat - d, lon - d, lat + d]     # bbox terbalik
+            if i % 43 == 0:
+                b = [lon + 0.5, lat - d, lon + 0.6, lat + d]  # pusat di luar bbox
+            ann_id = i
+            if i in (30, 31):
+                ann_id = 7                                   # id ganda
+            if i == 99:
+                ann_id = None                                # id kosong
+            nilai = {"ann_id": ann_id, "location": lok, "inventory": inv, "event_type": jenis,
+                     "type": rnd.choice(["Debris flow", "", "Rockfall"]), "velocity_c": rnd.choice([">=5", ""]),
+                     "author": rnd.choice(penulis), "reference": "https://contoh.test/%d" % (i % 3),
+                     "event_conf": rnd.choice(conf), "area": rnd.choice(luas),
+                     "pre_date": pre, "event_date": ev, "post_date": post,
+                     "pre_dt2": pre, "event_dt2": ev, "post_dt2": post,
+                     "center_lon": lon, "center_lat": lat,
+                     "bbox_min_lon": b[0], "bbox_min_lat": b[1], "bbox_max_lon": b[2], "bbox_max_lat": b[3],
+                     "sim_batch": 0 if i < n * 0.6 else rnd.choice([1, 2])}
+            w.writerow([fmt(nilai[nm]) for nm, _ in skema_anotasi])
+
+    inv_p = ["inv_a", "inv_b", "inv_x", "", " ", "inv_e", "inv_a"]
+    split = ["train", "val", "test", "train", "xx"]
+    piksel = [None, 0, 1, 5, 283, 283, 8911, -3]
+    with open(os.path.join(folder, "patches.csv"), "w", encoding="utf-8", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow([nm for nm, _ in skema_patch])
+        for j in range(n_patch):
+            pid = "p%03d" % (5 if j in (10, 11) else j)      # id ganda
+            nilai = {"patch_id": pid, "split": split[j % len(split)], "inventory": inv_p[j % len(inv_p)],
+                     "s2_path": "s2/%s.nc" % pid, "s1asc_path": "s1asc/%s.nc" % pid,
+                     "s1dsc_path": "" if j % 9 == 0 else "s1dsc/%s.nc" % pid,
+                     "pixel_annotated": rnd.choice(piksel), "sim_batch": 0 if j < n_patch * 0.6 else rnd.choice([1, 2])}
+            w.writerow([fmt(nilai[nm]) for nm, _ in skema_patch])
+
+
 if __name__ == "__main__":
     profil, folder = sys.argv[1], sys.argv[2]
     if profil == "laporan":

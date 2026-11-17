@@ -48,6 +48,7 @@ services:
     volumes:
       - ../data:/sen12ls-data:ro
       - ../bench:/bench:ro
+      - ../analitik:/analitik:ro
       - ../results:/results
       - ./:/hdfs-parquet:ro
     depends_on:

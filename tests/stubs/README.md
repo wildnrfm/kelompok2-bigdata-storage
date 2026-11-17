@@ -10,3 +10,7 @@ tanpa Docker. Mesin tiruannya Python biasa dan SQLite, jadi:
   versus bidang datar). Itu hanya bisa dibuktikan dengan menjalankan Docker sungguhan.
 
 Jangan menaruh folder ini di PYTHONPATH saat uji sungguhan.
+
+`pyspark` tiruan juga dipakai tahap analitik (`analitik/`): ia menjalankan SQL kueri analitik di SQLite dengan
+fungsi Spark tiruan dari `analitik/fungsi_spark.py` (`year`, `month`, `datediff`, `log10`, `floor`, `percentile`).
+Itu membuktikan alur kode dan hasil kueri, bukan perilaku Spark sungguhan (dialek, memori, kecepatan).

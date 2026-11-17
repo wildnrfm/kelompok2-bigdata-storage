@@ -384,7 +384,7 @@ git push
 
 - `git pull --rebase` mengambil kiriman teman lebih dulu (dua kali: sebelum dan sesudah commit, supaya `git push` tidak ditolak).
 - `git add <folder>` hanya memilih **foldermu**. Cek dulu dengan `git status`: merah = belum dipilih, hijau = siap di-commit.
-- Pesan commit diawali **[folder]**: `[data]`, `[mongodb]`, `[postgis]`, `[hdfs-parquet]`, `[bench]`, `[results]`, `[docs]`,
+- Pesan commit diawali **[folder]**: `[data]`, `[mongodb]`, `[postgis]`, `[hdfs-parquet]`, `[analitik]`, `[bench]`, `[results]`, `[docs]`,
   `[latihan]`; berkas di akar repo dan `tests/` memakai `[root]`.
 
 | Boleh dan dianjurkan | Jangan |

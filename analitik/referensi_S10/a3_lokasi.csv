@@ -1,0 +1,17 @@
+lokasi,inventaris,jenis,n,tahun_min,tahun_maks,area_p50,conf_rata2
+Italy,italy,Rainfall,475220,2022,2024,409.809708,1.0
+DominicaMaria,(tanpa-inventaris),Hurricane,101720,2016,2018,3191.6458425,1.0
+Newzealand,newzealand,Earthquake,32420,2015,2023,7906.1986905,0.5134478192473781
+Chimanimani,chimanimani,Rainfall,25130,2018,2020,2813.353024,1.0
+Kyrgyzstan1,kyrgyzstan1,(kosong),24050,2015,2020,8640.214561,0.4116867505197505
+Hokkaido,hokkaido,Earthquake,23400,2017,2019,7368.174373,1.0
+Hiroshima,hiroshima,Rainfall,22110,2017,2019,4161.996741,1.0
+Indonesia,indonesia,Earthquake,20970,2015,2020,26769.900757,0.7379107381974249
+LanaoDelNorte,(tanpa-inventaris),Tropical Storm,6400,2017,2019,21646.4225345,1.0
+Kyrgyzstan2,kyrgyzstan2,(kosong),5130,2016,2020,5512.644053,0.3483837933723197
+Thrissur,(tanpa-inventaris),Rainfall,4400,2017,2019,46036.1298535,1.0
+Itogon,itogon,Cyclone,3660,2017,2019,7342.494001999999,1.0
+USA_PuertoRico,usa,Earthquake,2630,2019,2021,1676.748985,1.0
+China,china,(kosong),1210,2015,2022,22451.937502,0.5503128099173554
+USA_Alaska,usa,(kosong),1030,2016,2020,466259.763924,1.0
+Nepal,(tanpa-inventaris),Earthquake,80,2016,2020,51717.7921655,0.321657125

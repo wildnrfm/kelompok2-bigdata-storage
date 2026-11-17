@@ -18,7 +18,7 @@ except Exception:
 ROOT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent
 DIBUAT_KEMUDIAN = ("data/out", "data/raw/", "data/CHECKSUMS.txt", "bench/points.json", "bench/benar",
                    "postgis/postgis", "results/", "docs/", "latihan/")
-POLA_JALUR = re.compile(r"`((?:bench|postgis|mongodb|hdfs-parquet|data|tests|baca-dulu)[/\\][A-Za-z0-9_.\-/\\]+)`")
+POLA_JALUR = re.compile(r"`((?:bench|postgis|mongodb|hdfs-parquet|analitik|data|tests|baca-dulu)[/\\][A-Za-z0-9_.\-/\\]+)`")
 
 
 def slug(judul):
