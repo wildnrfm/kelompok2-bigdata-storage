@@ -1,0 +1,4 @@
+skala,mode,n_anotasi,dasar,n_putaran,etl_ms,analitik_ms,ekspor_ms,total_ms,total_cold_ms,anotasi_per_detik,detik_per_juta_anotasi,rasio_data_vs_S1,rasio_waktu_vs_S1
+S1,etl,74956,warm,4,2106.8,19960.1,97.6,22317.4,51986.8,3359,297.74,1.0,1.0
+S10,etl,749560,warm,4,4542.8,29776.6,99.0,34535.4,53395.1,21704,46.07,10.0,1.5
+S100,etl,7495600,warm,2,38032.5,90372.7,101.0,128814.5,181303.9,58189,17.19,100.0,5.8

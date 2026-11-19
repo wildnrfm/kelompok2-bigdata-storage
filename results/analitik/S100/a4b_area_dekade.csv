@@ -1,0 +1,33 @@
+dekade_area,jenis,n
+-1,Rainfall,100
+0,Rainfall,200
+1,Cyclone,100
+1,Earthquake,300
+1,Hurricane,1900
+1,Rainfall,252000
+2,(kosong),700
+2,Cyclone,3400
+2,Earthquake,16700
+2,Hurricane,157600
+2,Rainfall,3486300
+3,(kosong),168300
+3,Cyclone,17300
+3,Earthquake,351200
+3,Hurricane,690300
+3,Rainfall,1393300
+3,Tropical Storm,13000
+4,(kosong),120900
+4,Cyclone,14900
+4,Earthquake,387700
+4,Hurricane,167100
+4,Rainfall,124700
+4,Tropical Storm,45600
+5,(kosong),21400
+5,Cyclone,900
+5,Earthquake,38700
+5,Hurricane,300
+5,Rainfall,11900
+5,Tropical Storm,5400
+6,(kosong),2900
+6,Earthquake,400
+6,Rainfall,100
