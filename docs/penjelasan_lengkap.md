@@ -249,7 +249,7 @@ Bukan kueri, tapi pengukuran:
 - Ukuran fisik data di disk (MiB)
 - Dicatat menggunakan skrip `bench/catat.py`
 
-**Status pencatatan (12 Nov 2026):** yang sudah ada di `results/` ialah ukuran di disk MongoDB dan PostGIS untuk S1, S10, dan S100 (`pengukuran_mongodb.csv`, `pengukuran_postgis.csv`), ukuran berkas mentah (`pengukuran_mentah.csv`), dan waktu bangun indeks hanya di S10 (MongoDB 23,9 detik; PostGIS 4,2 detik). **Belum tercatat:** waktu muat semua penyimpanan, waktu indeks di S100, dan ukuran Parquet di HDFS (`pengukuran_spark.csv` belum ada).
+**Status pencatatan (12 Nov 2026):** yang sudah ada di `results/` ialah ukuran di disk MongoDB dan PostGIS untuk S1, S10, dan S100 (`pengukuran_mongodb.csv`, `pengukuran_postgis.csv`), ukuran berkas mentah (`pengukuran_mentah.csv`), dan waktu bangun indeks hanya di S10 (MongoDB 23,9 detik; PostGIS 4,2 detik). **Belum tercatat:** waktu muat semua penyimpanan dan waktu indeks di S100. Ukuran Parquet di HDFS baru tercatat pada 22 Nov 2026 (`pengukuran_spark.csv`, lihat 7.2).
 
 ### W8 — Batch Append (Tambah Data Ke Tabel Aktif)
 **Pertanyaan:** "Berapa lama waktu yang dibutuhkan untuk menambahkan 1 batch data baru (`batch100`, 74.956 baris anotasi + 4.392 patch) ke tabel S100 yang sudah berisi 7,5 juta baris dan sudah terindeks penuh?"
@@ -380,9 +380,9 @@ Latensi p95 untuk 1, 10, 50, dan 100 klien ada di Bagian 7.4.
 |---|---|---|
 | **MongoDB** total (data + indeks; `annotations` + `patches`) | 1.861,96 MiB (≈ 1,82 GiB) | `results/pengukuran_mongodb.csv` |
 | **PostGIS** total (tabel + indeks + TOAST; `annotations` + `patches`) | 3.497,09 MiB (≈ 3,42 GiB) | `results/pengukuran_postgis.csv` |
-| **Parquet ZSTD** di HDFS | ≈ 470 MiB, **belum ada berkas ukur** | tidak ada di `results/` |
+| **Parquet ZSTD** di HDFS (`annotations` + `patches`, satu salinan, tanpa indeks) | 435,36 MiB (≈ 0,43 GiB) | `results/pengukuran_spark.csv` |
 
-Angka Parquet belum bisa ditelusuri ke berkas hasil (`results/pengukuran_spark.csv` belum ada), jadi jangan dikutip di laporan atau slide sebagai hasil ukur sebelum diukur ulang dengan `python bench/catat.py ukuran --store spark --skala S100`. Sebagai pembanding, berkas mentah S100 (CSV + NDJSON) berukuran 7.507,8 MiB.
+Parquet diukur pada 22 Nov 2026 di laptop Wildan dengan `python bench/catat.py ukuran --store spark`: 434,108 MiB untuk `annotations` dan 1,252 MiB untuk `patches` di S100 (S1 3,964 MiB; S10 43,234 MiB). Angka lama "≈ 470 MiB" dari catatan saat konversi diganti angka terukur ini. Parquet tidak memiliki indeks, sedangkan angka MongoDB dan PostGIS sudah termasuk indeks. Kolom `ukuran_dengan_replika` bernilai 3 kali ukuran satu salinan (1.306,08 MiB di S100): faktor replikasi berkas Parquet 3, karena berkas ditulis oleh Spark yang tidak memuat `hadoop.env` (replikasi 2); angka itu tidak dibandingkan. Sebagai pembanding, berkas mentah S100 (CSV + NDJSON) berukuran 7.507,8 MiB.
 
 ### 7.3 Efek Indeks (Eksperimen E1 pada S10)
 
@@ -456,9 +456,9 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 
 **Pernyataan (awal):** Urutan dari paling hemat disk: Parquet, PostGIS, MongoDB.
 
-**Hasil:** **DITOLAK pada urutan MongoDB dan PostGIS; posisi Parquet belum terbukti.**
-- Terukur di S100 (`results/pengukuran_*.csv`): **MongoDB 1.861,96 MiB < PostGIS 3.497,09 MiB**. MongoDB **1,88× lebih hemat**, dan lebih kecil di ketiga skala (2,31× di S1, 1,87× di S10, 1,88× di S100)
-- Parquet ≈ 470 MiB tidak punya berkas ukur di `results/`, jadi urutan lengkapnya belum bisa dipastikan. Parquet paling kecil itu masuk akal (kolumnar dan ZSTD), tetapi harus diukur dulu (Bagian 7.2)
+**Hasil:** **DITOLAK sebagian: Parquet paling kecil sesuai dugaan, tetapi urutan MongoDB dan PostGIS terbalik.**
+- Terukur di S100 (`results/pengukuran_*.csv`): **Parquet 435,36 MiB < MongoDB 1.861,96 MiB < PostGIS 3.497,09 MiB**. Parquet 4,3× lebih kecil dari MongoDB dan 8,0× dari PostGIS (tanpa indeks; bila indeks tidak dihitung, data anotasi Parquet 2,8× dan 5,7× lebih kecil dari data MongoDB dan PostGIS). Antara MongoDB dan PostGIS, MongoDB **1,88× lebih hemat**, dan lebih kecil di ketiga skala (2,31× di S1, 1,87× di S10, 1,88× di S100)
+- Parquet paling kecil sesuai dugaan (kolumnar, ZSTD, tanpa indeks); angkanya ada di `results/pengukuran_spark.csv` (Bagian 7.2). Yang terbalik hanya urutan MongoDB dan PostGIS
 - **Dugaan sebab:** selisih terbesar ada di data. `annotations` S100 memakai 1.218,80 MiB di MongoDB (WiredTiger mengompresi 4.541,66 MiB data tak terkompres; bawaannya Snappy) lawan 2.468,02 MiB di PostGIS (halaman 8 KiB tanpa kompresi tabel). Indeksnya 613,62 lawan 941,18 MiB
 
 ### H4 — Spark Lebih Cepat untuk Agregasi Skala Besar (W5 di S100)
@@ -501,7 +501,7 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 ### Kapan Pakai Spark + Parquet?
 - Ketika kebutuhan utama adalah agregasi analitik pada dataset sangat besar (>5 juta baris): di S100 Spark 5,3× lebih cepat dari MongoDB pada W5, tetapi PostGIS masih 1,13× lebih cepat (1.141,6 vs 1.293,2 ms)
 - Data warehouse, pelatihan model AI/ML, batch processing
-- Ketika biaya penyimpanan menjadi pertimbangan utama: Parquet ≈ 470 MiB, sekitar 7,4× lebih kecil dari PostGIS dan 4× lebih kecil dari MongoDB (angka Parquet belum punya berkas ukur, lihat 7.2)
+- Ketika biaya penyimpanan menjadi pertimbangan utama: Parquet 435,36 MiB, sekitar 8,0× lebih kecil dari PostGIS dan 4,3× lebih kecil dari MongoDB (S100, satu salinan, tanpa indeks; lihat 7.2)
 - Bukan untuk kueri titik real-time (median W1 84 sampai 206 ms per kueri)
 - Untuk analitik batch atas katalog ini (ETL dan 14 kueri), Spark pada HDFS dan Parquet menghasilkan angka yang cocok dengan acuan mandiri pada S1, S10, dan S100, dan memproses 7.495.600 anotasi dalam sekitar 129 detik (median putaran warm, laptop dua inti); lihat Bagian 13
 

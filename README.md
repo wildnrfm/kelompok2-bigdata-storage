@@ -35,7 +35,7 @@ Tanda `[x]` dipasang bila ada jejaknya di repo (hasil di `results/`, wasit di `b
 - [ ] #19 sampai #24 Dokumen rancangan, slide pitching, tinjau silang, latihan (SINKRON 2)
 - [x] #25 W1 sampai W6 benar di S1 di ketiganya (`compare_counts.py` dengan wasit: semua cocok)
 - [x] #26 S10 dan S100 termuat di ketiganya (laptop uji)
-- [ ] #27 W1 sampai W8, E1, E2 dijalankan (W7 belum lengkap: waktu muat dan waktu indeks S100 belum tercatat; ukuran Parquet belum ada berkas ukurnya)
+- [ ] #27 W1 sampai W8, E1, E2 dijalankan (W7 belum lengkap: waktu muat dan waktu indeks S100 belum tercatat; ukuran Parquet sudah terukur pada 22 Nov di `results/pengukuran_spark.csv`)
 - [x] #28 Uji silang jumlah hasil di S10 dan S100 (`results/uji_silang_S10_S100.txt`; satu selisih diketahui: S100 W2 titik 19)
 - [x] #29 Tabel, grafik, hipotesis H1 sampai H5 (`docs/penjelasan_lengkap.md`)
 - [x] Tahap 3 (pemrosesan dan analitik): kode, 14 kueri, acuan S1, S10, S100, dan uji tanpa Docker selesai (`analitik/`)

@@ -161,7 +161,7 @@ python bench\catat.py ukuran --store spark --skala S100
 type results\pengukuran_spark.csv
 ```
 
-Berkas `results/pengukuran_spark.csv` memuat, untuk `annotations` dan `patches` di tiap skala, dua jenis ukuran dalam MiB: `ukuran_total` (satu salinan, yang dibandingkan dengan MongoDB dan PostGIS) dan `ukuran_dengan_replika` (ruang yang benar-benar dipakai HDFS dengan replikasi 2).
+Berkas `results/pengukuran_spark.csv` memuat, untuk `annotations` dan `patches` di tiap skala, dua jenis ukuran dalam MiB: `ukuran_total` (satu salinan, yang dibandingkan dengan MongoDB dan PostGIS) dan `ukuran_dengan_replika` (ruang yang dihitung HDFS untuk semua replika: ukuran satu salinan dikali faktor replikasi berkas). Pada pengukuran 22 November 2026 faktornya 3, bukan 2 seperti pada `hadoop.env`, karena berkas ditulis oleh kontainer Spark yang tidak memuat `hadoop.env`; dengan dua DataNode, tiap blok tetap hanya punya dua salinan fisik. Hasilnya (annotations + patches, satu salinan): S1 3,964 MiB, S10 43,234 MiB, S100 435,360 MiB.
 
 **Langkah 8. Commit** (hanya folder hasil ini; jangan `git add docs`). Blok ini berhenti sendiri bila hasilnya belum lengkap.
 

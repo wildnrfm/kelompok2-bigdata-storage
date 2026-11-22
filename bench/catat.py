@@ -150,8 +150,10 @@ def ukur_hdfs(skala):
     for nama in ("annotations", "patches"):
         jalur = "/data/sen12ls/parquet/%s/%s" % (skala.lower(), nama)
         s, sr = urai_hdfs(jalankan(["docker", "exec", "sen12ls-namenode", "hdfs", "dfs", "-du", "-s", jalur]))
+        faktor = sr / s if s else 0.0
         baris += [baris_baru("spark", skala, "ukuran_total", nama, s / MIB, "MiB", "satu salinan, tanpa replikasi"),
-                  baris_baru("spark", skala, "ukuran_dengan_replika", nama, sr / MIB, "MiB", "replikasi 2")]
+                  baris_baru("spark", skala, "ukuran_dengan_replika", nama, sr / MIB, "MiB",
+                             "semua replika menurut hdfs dfs -du (faktor replikasi berkas %.1f)" % faktor)]
     return baris
 
 

@@ -208,11 +208,11 @@ Ukuran berkas mentah (CSV dan NDJSON) per skala, sebagai referensi sebelum dimua
 |---|---|---|
 | MongoDB | 1.832,418 + 29,539 MiB | 1.861,957 MiB (≈ 1,82 GiB) |
 | PostGIS | 3.409,906 + 87,188 MiB | 3.497,094 MiB (≈ 3,42 GiB) |
-| Parquet (HDFS) | — | **belum terukur** |
+| Parquet (HDFS) | 434,108 + 1,252 MiB (satu salinan, tanpa indeks) | 435,360 MiB (≈ 0,43 GiB) |
 
 ### Yang belum ada di `results/`
 
-- `pengukuran_spark.csv`: ukuran Parquet di HDFS dan W8 Spark. Angka "Parquet ≈ 470 MiB" yang pernah beredar **belum punya berkas ukur**. Ukur dengan `python bench\catat.py ukuran --store spark --skala S100` (butuh HDFS jalan).
+- W8 Spark (waktu tambah batch ke S100) belum tercatat. Ukuran Parquet sudah ada di `pengukuran_spark.csv` (diukur 22 Nov 2026 di laptop Wildan); angka lama "Parquet ≈ 470 MiB" diganti angka terukur 435,36 MiB.
 - Waktu muat (`jenis` = `muat`) untuk semua penyimpanan, dan waktu indeks S100. Cara mencatat ada di docstring `bench\catat.py`.
 
 ---
@@ -370,11 +370,11 @@ Semua hasil sudah di-push ke GitHub dan bisa dibaca di browser:
 | Tercepat untuk kueri jendela (W2 S100)? | **PostGIS 1,2 ms**; MongoDB 8,8 ms; Spark 546 ms (PostGIS ≈ 454× lebih cepat dari Spark) | `banding.csv` baris W2/S100/warm |
 | Tercepat untuk kotak pembatas (W4 S100)? | **PostGIS 33,0 ms** vs MongoDB 640,0 ms (19,4× lebih cepat). p95 MongoDB 206 detik, hanya dari dua titik (3 dan 20) | `banding.csv`, `ringkasan.csv` baris W4/S100 |
 | Seberapa besar manfaat indeks? (E1, S10, W2) | MongoDB 1.119,7 → 2,46 ms (**455×**); PostGIS 213,9 → 0,91 ms (**235×**) | `banding.csv` baris W2/S10 |
-| Paling hemat disk (S100)? | **MongoDB 1.861,96 MiB < PostGIS 3.497,09 MiB** (1,88×). Parquet ≈ 470 MiB **belum terukur** | `pengukuran_mongodb.csv`, `pengukuran_postgis.csv` |
+| Paling hemat disk (S100)? | **Parquet 435,36 MiB < MongoDB 1.861,96 MiB < PostGIS 3.497,09 MiB** (Parquet 4,3× dan 8,0× lebih kecil; MongoDB 1,88× lebih kecil dari PostGIS; Parquet tanpa indeks, dua lainnya termasuk indeks) | `pengukuran_spark.csv`, `pengukuran_mongodb.csv`, `pengukuran_postgis.csv` |
 | Kapan Spark lebih cepat dari MongoDB? | W5 S100: Spark 1.293 ms vs MongoDB 6.869 ms (5,3×), tetapi PostGIS (1.142 ms) lebih cepat dari Spark. Di W6 S100 MongoDB (131,7 ms) lebih cepat dari Spark (531,2 ms) | `banding.csv` baris W5/S100 dan W6/S100 |
 | Stabil saat 50 klien serentak? | p95 50 klien ÷ p95 1 klien (titik 1 sampai 20): MongoDB 5,1×, PostGIS 8,2×, keduanya di bawah batas 10×. Pada 100 klien 10,7× dan 25,4×. Klien = thread Python di satu laptop | `ringkasan.csv` filter W1/S100/warm |
 | Apakah jumlah hasil sama di ketiganya? | Ya, kecuali satu kueri: S100 W2 titik 19 (MongoDB 1.401; lainnya 1.400) | `results/uji_silang_S10_S100.txt` |
-| Hipotesis mana yang diterima? | H1 sebagian, H2 diterima, H3 ditolak sebagian (urutan MongoDB dan PostGIS terbalik; Parquet belum terukur), H4 sebagian, H5 diterima dengan catatan | `docs/penjelasan_lengkap.md` Bagian 8 |
+| Hipotesis mana yang diterima? | H1 sebagian, H2 diterima, H3 ditolak sebagian (Parquet paling kecil sesuai dugaan, tetapi urutan MongoDB dan PostGIS terbalik), H4 sebagian, H5 diterima dengan catatan | `docs/penjelasan_lengkap.md` Bagian 8 |
 | Total yang diuji? | 90 berkas CSV (30.666 baris; 29.706 dipakai di ringkasan), 74 grup, 0 galat | `ringkasan.csv` kolom `galat_n` |
 
 ---

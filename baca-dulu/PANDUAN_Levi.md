@@ -631,7 +631,7 @@ Status: HEALTHY
  Average block replication:	2.0
 ```
 
-Harus ada `_SUCCESS` dan satu atau beberapa berkas `part-...zstd.parquet`; angka `2` pada kolom kedua dan `Average block replication: 2.0` menunjukkan **replikasi 2**; `Status: HEALTHY`.
+Harus ada `_SUCCESS` dan satu atau beberapa berkas `part-...zstd.parquet`; `Average block replication: 2.0` menunjukkan dua salinan fisik per blok (ada dua DataNode); `Status: HEALTHY`. Berkas yang ditulis Spark tercatat berfaktor replikasi 3 (bawaan klien Spark, bukan 2 seperti di `hadoop.env`), sehingga `hdfs dfs -du` melaporkan ruang semua replika sebesar 3 kali ukuran satu salinan.
 
 ### 15.3 Periksa isi bersama Syuep
 
@@ -644,7 +644,7 @@ Berbagi layar dan jalankan bersama. Hasil yang benar: `74956  109  16` dan `4392
 python bench\catat.py ukuran --store spark --skala S1
 ```
 
-Contoh hasil: baris `ukuran_total` (satu salinan) dan `ukuran_dengan_replika` (replikasi 2) untuk `annotations` dan `patches`, dalam MiB, lalu `Tercatat 4 baris  ->  ...pengukuran_spark.csv`.
+Contoh hasil: baris `ukuran_total` (satu salinan) dan `ukuran_dengan_replika` (semua replika menurut HDFS; faktor 3 pada pengukuran 22 Nov) untuk `annotations` dan `patches`, dalam MiB, lalu `Tercatat 4 baris  ->  ...pengukuran_spark.csv`.
 Untuk H3 yang dibandingkan adalah `ukuran_total` (satu salinan); replikasi dicatat terpisah dan dijelaskan di laporan.
 
 ### 15.5 Jalankan W3 lewat harness dan cocokkan dengan wasit
