@@ -6,13 +6,15 @@
 **Kelompok:** 2
 
 ### Anggota Tim:
-1. **Muhammad Wildan Arif Maulana** (23051204065) — *Project Lead, Documentation & QA*
+1. **Muhammad Wildan Arif Maulana** (23051204065) — *Project Lead, Documentation & QA, dan pemrosesan-analitik Spark (Tahap 3)*
 2. **Maulana Hidayah Syaif Ali Khan** (23051204068) — *Data Collection & Conversion Engineer*
 3. **Elsa Claudia Putri** (23051204038) — *Storage Engineer A (MongoDB Specialist & Benchmark Lead)*
 4. **Muhammad Syah Levi** (23051204051) — *Storage Engineer B (PostGIS & HDFS-Spark Specialist)*
 5. **Marsanda Sofi Aminarti** (23051204066) — *Performance Analyst & Validation Lead*
 
 > **Catatan revisi (12 Nov 2026).** Semua angka hasil di dokumen ini diambil dari `results/banding.csv` dan `results/ringkasan.csv` yang dibuat ulang dengan `python bench/summarize.py --titik-maks 20`: 90 berkas hasil tanggal 6 dan 7 Nov (30.666 baris; 29.706 dipakai di ringkasan karena S100 hanya titik 1 sampai 20), 74 grup, 0 galat. Berkas hasil 2 Nov dipindahkan ke `results/arsip/` dan tidak ikut dihitung. Penjelasan sebab yang belum diuji ditulis sebagai **dugaan**, dan angka yang perlu diukur ulang diberi tanda.
+
+> **Catatan revisi (21 Nov 2026).** Ditambahkan **Bagian 13** (Tahap 3: pemrosesan dan analitik dengan Spark) beserta folder `analitik/` pada Bagian 10 dan 11; jumlah uji otomatis kini 22. Angka pada Bagian 7 sampai 9 tidak berubah, dan ukuran Parquet di HDFS masih belum punya berkas ukur (lihat 7.2).
 
 ---
 
@@ -315,6 +317,8 @@ Laptop uji resmi tim adalah **laptop Elsa Claudia Putri** (satu mesin supaya har
 - **Penyimpanan:** NVMe SSD
 - **OS:** Windows 11 + Docker Desktop
 
+Spesifikasi di atas berlaku untuk seluruh pengukuran Bagian 7 (tahap penyimpanan). Pengukuran waktu **Tahap 3** (Bagian 13) dijalankan di laptop lain, yaitu laptop Wildan (Lenovo 20JTS1PK00, Intel Core i5-6200U 2 inti/4 utas, RAM 11,9 GB, WSL2 dibatasi `memory=6GB processors=2`), sehingga angkanya tidak dibandingkan langsung dengan latensi pada Bagian 7.
+
 ---
 
 ## BAGIAN 7: HASIL PENGUKURAN EMPIRIS
@@ -499,6 +503,7 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 - Data warehouse, pelatihan model AI/ML, batch processing
 - Ketika biaya penyimpanan menjadi pertimbangan utama: Parquet ≈ 470 MiB, sekitar 7,4× lebih kecil dari PostGIS dan 4× lebih kecil dari MongoDB (angka Parquet belum punya berkas ukur, lihat 7.2)
 - Bukan untuk kueri titik real-time (median W1 84 sampai 206 ms per kueri)
+- Untuk analitik batch atas katalog ini (ETL dan 14 kueri), Spark pada HDFS dan Parquet menghasilkan angka yang cocok dengan acuan mandiri pada S1, S10, dan S100, dan memproses 7.495.600 anotasi dalam sekitar 129 detik (median putaran warm, laptop dua inti); lihat Bagian 13
 
 ---
 
@@ -549,6 +554,18 @@ kelompok2-bigdata-storage/
 │   ├── run_sql.py              ← Jalankan kueri Spark SQL
 │   └── sql/                    ← File kueri W1–W6 dalam .sql (Spark)
 │
+├── analitik/               ← Tahap 3: pemrosesan dan analitik Spark (Wildan)
+│   ├── spark_pipeline.py       ← Pipeline: ETL, 14 kueri, ekspor CSV, pencatat waktu
+│   ├── kueri_analitik.py       ← Definisi SQL 14 kueri dan skema kolom
+│   ├── fungsi_spark.py         ← Fungsi Spark yang ditiru di SQLite untuk uji
+│   ├── referensi.py            ← Penghitung acuan mandiri (Python murni)
+│   ├── referensi_S1/, referensi_S10/, referensi_S100/  ← 14 CSV jawaban benar per skala
+│   ├── cocokkan.py             ← Bandingkan hasil Spark dengan acuan
+│   ├── uji_sql.py              ← Jalankan 14 SQL di SQLite, bandingkan dengan acuan
+│   ├── ringkas_waktu.py        ← Ringkas waktu pemrosesan per skala
+│   ├── grafik.py               ← Grafik G1 sampai G6 (PNG)
+│   └── README.md               ← Cara menjalankan dan memeriksa Tahap 3
+│
 ├── bench/                  ← Framework benchmark dan verifikasi
 │   ├── harness.py              ← Runner utama benchmark
 │   ├── kueri.py                ← Dispatcher kueri ke tiap database
@@ -567,15 +584,17 @@ kelompok2-bigdata-storage/
 │   ├── pengukuran_mongodb.csv  ← Ukuran disk, waktu indeks S10, W8 MongoDB
 │   ├── pengukuran_postgis.csv  ← Ukuran disk, waktu indeks S10, W8 PostGIS
 │   ├── uji_silang_S10_S100.txt ← Hasil compare_counts untuk S10 dan S100
+│   ├── analitik/               ← Hasil Tahap 3: S1/, S10/, S100/ (14 CSV tiap skala), waktu, grafik/
 │   ├── 20261106_*.csv, 20261107_*.csv  ← 90 file hasil benchmark mentah
 │   └── arsip/                  ← 21 file 2 Nov (tidak dihitung)
 │
 ├── docs/                   ← Dokumen deliverable
+│   ├── Laporan_Big_Data_Kelompok2.docx  ← Laporan (Bab I sampai V)
 │   ├── penjelasan_lengkap.md   ← Dokumen ini
 │   └── panduan_cek_hasil.md    ← Cara melihat dan memahami hasil
 │
 ├── tests/                  ← Test suite otomatis
-│   ├── uji_semua.py            ← Jalankan 17 uji sekaligus
+│   ├── uji_semua.py            ← Jalankan 22 uji sekaligus
 │   └── lint_dokumen.py         ← Periksa dokumen .md
 │
 ├── TEAM.md                 ← Daftar anggota dan spesifikasi laptop
@@ -591,7 +610,7 @@ kelompok2-bigdata-storage/
 
 | Anggota | Peran | Folder yang Dikerjakan |
 |---|---|---|
-| **Muhammad Wildan Arif Maulana** | Project Lead, Dokumentasi & QA | `docs/`, `tests/`, file di root repo |
+| **Muhammad Wildan Arif Maulana** | Project Lead, Dokumentasi & QA, pemrosesan-analitik Spark | `docs/`, `tests/`, `analitik/`, file di root repo |
 | **Maulana Hidayah Syaif Ali Khan** | Data Collection Engineer | `data/` |
 | **Elsa Claudia Putri** | Storage Engineer A (MongoDB) + Benchmark Lead | `mongodb/`, `results/` |
 | **Muhammad Syah Levi** | Storage Engineer B (PostGIS + HDFS) | `postgis/`, `hdfs-parquet/` |
@@ -661,6 +680,62 @@ Siapa pun dapat mereproduksi seluruh benchmark dengan:
 5. `python bench/harness.py --store [mongodb|postgis|spark] --workload [W1–W6] --scale [S1|S10|S100]`
 6. `python bench/summarize.py --titik-maks 20` (S100 hanya titik 1 sampai 20)
 7. `python bench/compare_counts.py --tanpa-wasit --titik-maks 20 <tiga berkas hasil W2 S100>`, lalu `python tests/uji_semua.py` untuk uji tanpa Docker
+8. Tahap 3 (pemrosesan dan analitik): ikuti [analitik/README.md](../analitik/README.md), lalu `python analitik/cocokkan.py` untuk S1 (dan `--hasil results/analitik/S10`, `--hasil results/analitik/S100`)
 
 Seed acak tetap `20261023` menjamin hasil generator identik di semua mesin.
 
+---
+
+## BAGIAN 13: TAHAP 3, PEMROSESAN DAN ANALITIK DENGAN SPARK
+
+Tahap ini ditambahkan setelah tahap penyimpanan (Bagian 1 sampai 12). Data yang sudah tersimpan di HDFS dalam format Parquet diolah dengan Apache Spark menjadi tabel turunan, dianalisis dengan 14 kueri SQL, dan hasilnya diekspor sebagai CSV dan grafik. Tahap ini menjawab dua pertanyaan: (1) apa yang dapat diketahui dari isi katalog Sen12Landslides dan seberapa dapat diandalkan metadatanya, dan (2) bagaimana waktu pemrosesan Spark berubah ketika data bertambah dari S1 ke S10 dan S100. Kode dan cara menjalankannya ada di `analitik/` ([analitik/README.md](../analitik/README.md)); laporan membahasnya di Bab IV.
+
+### 13.1 Rancangan Pipeline
+
+Satu putaran pipeline (`analitik/spark_pipeline.py`) terdiri dari tiga tahap yang waktunya dicatat satu per satu:
+
+1. **ETL.** Satu kueri SQL membuat tabel turunan `ann_kaya` (jenis pemicu, tahun dan bulan kejadian, belahan bumi, selang hari citra sebelum dan sesudah kejadian, dekade luas, dan sel 0,1 derajat). Tabel ditulis ke HDFS sebagai Parquet ZSTD, dibaca ulang, dan jumlah barisnya dicocokkan.
+2. **Analitik.** 14 kueri Spark SQL: `q0` sampai `q2` untuk jumlah dan kualitas data, `a1` sampai `a8` untuk isi katalog.
+3. **Ekspor.** Tiap hasil ditulis sebagai CSV di `results/analitik/<skala>/`.
+
+Setiap sesi Spark mengulang putaran penuh: putaran pertama berlabel *cold* (JVM baru), sisanya *warm*. S1 dan S10 dijalankan 5 putaran (1 cold dan 4 warm), S100 3 putaran (1 cold dan 2 warm) karena satu putaran S100 memerlukan 2 sampai 3 menit. Angka utama adalah median putaran *warm*. Seluruhnya 13 putaran kali 17 tahap (ETL, 14 kueri, ekspor, dan total) menjadi 221 baris di `results/analitik/waktu_pemrosesan.csv`.
+
+### 13.2 Verifikasi Kebenaran
+
+Angka analitik hanya berguna bila benar, sehingga setiap tabel dibandingkan dengan perhitungan yang tidak memakai Spark:
+- `analitik/referensi.py` menghitung ke-14 hasil dengan Python murni; hasilnya disimpan di `analitik/referensi_S1/`, `analitik/referensi_S10/`, dan `analitik/referensi_S100/`.
+- Ke-14 SQL yang sama dijalankan di SQLite dengan fungsi Spark yang ditiru (`analitik/uji_sql.py`) dan hasilnya sama dengan acuan; pada S1 juga sama dengan perhitungan pandas.
+- Hasil Spark 3.5.0 sungguhan dibandingkan dengan acuan oleh `analitik/cocokkan.py` dengan toleransi relatif 1e-9: S1 14 tabel (1.130 sel), S10 dan S100 masing-masing 14 tabel (1.418 sel); semuanya cocok.
+- `tests/uji_semua.py` kini memuat 22 uji, 5 di antaranya untuk tahap ini.
+
+Persentil dihitung eksak dengan `percentile()` (interpolasi linear), bukan `percentile_approx`, agar dapat dicocokkan angka demi angka.
+
+### 13.3 Hasil Pengukuran Waktu
+
+Pengukuran resmi dijalankan pada 19 November 2026 di **laptop Wildan** (Lenovo 20JTS1PK00, Intel Core i5-6200U 2 inti/4 utas, RAM 11,9 GB, WSL2 `memory=6GB processors=2`, Docker 2 CPU dan 5,79 GiB). Spark 3.5.0 berjalan dalam mode `local[2]` dengan `--driver-memory 2g`; HDFS terdiri dari 1 NameNode dan 2 DataNode (replikasi 2) pada satu mesin virtual; MongoDB, PostGIS, dan Grafana dimatikan. Mesin ini bukan laptop uji Bagian 7, sehingga angkanya tidak dibandingkan langsung dengan latensi di sana.
+
+| Skala | Anotasi | Median warm (detik) | Cold (detik) | Anotasi per detik | Waktu dibanding S1 |
+|---|---:|---:|---:|---:|---:|
+| S1 | 74.956 | 22,3 | 52,0 | 3.359 | 1,0× |
+| S10 | 749.560 | 34,5 | 53,4 | 21.704 | 1,5× |
+| S100 | 7.495.600 | 128,8 | 181,3 | 58.189 | 5,8× |
+
+Data bertambah 100 kali, sedangkan waktu satu putaran hanya 5,8 kali. Bila waktu dimodelkan sebanding dengan n^b (n = jumlah anotasi), eksponen b adalah 0,38 dari S1 ke S100, 0,19 dari S1 ke S10, dan 0,57 dari S10 ke S100. Eksponen yang naik mengindikasikan bahwa pada data kecil sebagian besar waktu adalah biaya tetap Spark, dan baru pada S100 data mulai menentukan. Pada S100 empat tahap terberat adalah ETL (38,0 detik; 29,5%), `q2_pemeriksaan` (22,8 detik; 17,7%), `q1_kolom_kosong` (17,1 detik; 13,3%), dan `a4a_area_jenis` (13,1 detik; 10,1%). Hasil berasal dari satu sesi per skala tanpa pengulangan antarsesi, sehingga dibaca sebagai orde besaran.
+
+### 13.4 Temuan tentang Isi Katalog (S1)
+
+Analisis isi hanya bermakna pada S1, karena S10 dan S100 adalah salinan simulasi.
+- **Terkonsentrasi.** Rainfall 52.686 anotasi (70,3%); lokasi Italy 47.522 anotasi (63,4%), seluruhnya pada satu hari (16 Mei 2023). Tiga lokasi teratas 60.936 anotasi (81,3%), dan 9 dari 16 lokasi hanya memiliki satu tanggal kejadian (66.467 anotasi, 88,7%). Pola tahunan karenanya lebih mencerminkan inventaris mana yang masuk dataset daripada kecenderungan longsor di dunia.
+- **Kualitas.** 11 dari 13 pemeriksaan kualitas tidak menemukan pelanggaran, termasuk seluruh pemeriksaan geometri dan identitas. Dua temuan: 3.142 anotasi (4,2%) tanpa jenis pemicu, dan 109 anotasi (0,15%) tanpa satu pun tanggal kejadian. Sebanyak 23 dari 31 kolom lengkap; `inventory` kosong pada 11.260 baris (15,0%), seluruhnya dari empat lokasi yang tidak memiliki inventaris.
+- **Luas anotasi.** Median luas berbeda jauh antarjenis pemicu (474 untuk Rainfall, 11.182 untuk Earthquake; satuan tidak dinyatakan sumber data), tetapi 90,2% anotasi Rainfall berasal dari Italy, sehingga pemicu, lokasi, dan cara anotasi tercampur. Perbedaan itu tidak boleh dibaca sebagai sifat pemicunya.
+- **Kepadatan spasial.** 368 sel 0,1 derajat terisi; median 42,5 anotasi per sel, persentil ke-95 sekitar 1.075, dan maksimum 4.255 pada sel sekitar 11,85° BT dan 44,15° LU (Italy). Dua puluh sel terpadat memuat 53,5% anotasi.
+- **Keandalan atribut.** `event_conf` bernilai tepat 1,0 pada 85,2% anotasi (seluruh Rainfall, Hurricane, Tropical Storm, dan Cyclone), sehingga kolom ini hanya informatif untuk Earthquake dan anotasi tanpa jenis.
+
+Katalog dapat dipakai untuk pencarian dan agregasi seperti pada tahap penyimpanan, tetapi kurang memadai sebagai dasar model prediktif tanpa data tambahan. Karena itu model prediktif tidak dibuat.
+
+### 13.5 Keterbatasan
+
+1. S10 dan S100 adalah salinan simulasi S1 (seed 20261023): waktunya sah untuk menguji skala, tetapi isinya tidak bermakna ilmiah.
+2. Pengukuran dilakukan pada satu laptop dua inti dalam satu sesi per skala, tanpa pengulangan antarsesi, dan kemungkinan pelambatan akibat suhu tidak diukur. HDFS berupa dua DataNode pada satu mesin virtual dan Spark berjalan `local[2]`, sehingga tidak ada transfer jaringan antarnode dan hasilnya tidak mewakili klaster terdistribusi.
+3. Jumlah putaran sedikit (S1 dan S10 lima putaran; S100 tiga putaran, sehingga median *warm* S100 adalah rata-rata dua angka). Waktu memuat Parquet ke HDFS (26,8; 41,8; dan 235,5 detik untuk S1, S10, dan S100) hanya tercatat dari keluaran terminal, tidak dari berkas di `results/`.
+4. Satuan kolom `area` tidak dinyatakan sumber data. MongoDB dan PostGIS tidak diberi analitik yang sama, sehingga tahap ini tidak membandingkan ketiganya pada beban analitik.

@@ -2,7 +2,7 @@
 ## Kelompok 2 — Big Data Storage (Kelas B)
 
 **Anggota Tim:**
-1. **Muhammad Wildan Arif Maulana** (23051204065) — *Project Lead, Documentation & QA*
+1. **Muhammad Wildan Arif Maulana** (23051204065) — *Project Lead, Documentation & QA, dan pemrosesan-analitik Spark (Tahap 3)*
 2. **Maulana Hidayah Syaif Ali Khan** (23051204068) — *Data Collection & Conversion Engineer*
 3. **Elsa Claudia Putri** (23051204038) — *Storage Engineer A (MongoDB Specialist & Benchmark Lead)*
 4. **Muhammad Syah Levi** (23051204051) — *Storage Engineer B (PostGIS & HDFS-Spark Specialist)*
@@ -11,6 +11,8 @@
 > Repositori: `https://github.com/wildnrfm/kelompok2-bigdata-storage`
 
 > **Catatan revisi (12 Nov 2026).** Panduan ini disamakan dengan isi repo: nama kolom berkas mentah, jumlah berkas (90, bukan 111), perintah `compare_counts.py` dan `kebenaran.py`, dan angka kunci. Ringkasan dibuat dengan `python bench\summarize.py --titik-maks 20`. Hal yang belum terbukti ditulis sebagai **dugaan**, dan hal yang belum diukur ditulis **belum terukur**.
+
+> **Catatan revisi (21 Nov 2026).** Ditambahkan **CARA 10** (cek hasil Tahap 3, pemrosesan dan analitik Spark di `results/analitik/`) dan jumlah uji otomatis diperbarui menjadi 22. Cara 1 sampai 9 tidak berubah.
 
 ---
 
@@ -340,7 +342,7 @@ python tests\uji_semua.py
 python tests\lint_dokumen.py
 ```
 
-Harus tampil `SEMUA UJI LULUS (17 uji, 13 detik)` (jumlah detik berbeda tiap mesin) dan `17 berkas .md diperiksa, 0 masalah.` (jumlah berkas bisa bertambah).
+Harus tampil `SEMUA UJI LULUS (22 uji, 18 detik)` (jumlah detik berbeda tiap mesin) dan `18 berkas .md diperiksa, 0 masalah.` (jumlah berkas bisa bertambah).
 
 ---
 
@@ -377,6 +379,53 @@ Semua hasil sudah di-push ke GitHub dan bisa dibaca di browser:
 
 ---
 
+## CARA 10: CEK HASIL TAHAP 3 (PEMROSESAN DAN ANALITIK)
+
+Tahap 3 memproses katalog dengan Spark (ETL, 14 kueri, ekspor) dan mengukur waktunya di S1, S10, dan S100. Hasilnya ada di `results/analitik/`, terpisah dari hasil benchmark di Cara 1 sampai 9. Pengukurannya dijalankan di laptop Wildan (bukan laptop uji Elsa), jadi angkanya tidak dibandingkan langsung dengan latensi MongoDB dan PostGIS.
+
+### Isi `results/analitik/`
+
+| Yang dicari | Berkas/folder |
+|---|---|
+| 14 tabel hasil analitik per skala (nama berkas = nama kueri, misalnya `q0_hitung.csv`) | `results/analitik/S1/`, `S10/`, `S100/` |
+| Waktu mentah tiap tahap (221 baris: 13 putaran kali 17 tahap) | `results/analitik/waktu_pemrosesan.csv` |
+| Ringkasan waktu per skala (median warm, cold, anotasi per detik) | `results/analitik/ringkasan_waktu.csv` |
+| Waktu per tahap (cold dan median warm) | `results/analitik/waktu_per_tahap.csv` |
+| Grafik G1 sampai G6 (PNG) | `results/analitik/grafik/` |
+| Jawaban benar (acuan mandiri) per skala | `analitik/referensi_S1/`, `analitik/referensi_S10/`, `analitik/referensi_S100/` |
+
+### Langkah 1 — Lihat ringkasan waktu
+
+```powershell
+Import-Csv results\analitik\ringkasan_waktu.csv | Format-Table skala,n_anotasi,n_putaran,total_ms,total_cold_ms,anotasi_per_detik,rasio_waktu_vs_S1
+```
+
+Harus tampil tiga baris. `total_ms` adalah median putaran warm: S1 22.317,4; S10 34.535,4; S100 128.814,5 (milidetik). `total_cold_ms` adalah putaran cold: 51.986,8; 53.395,1; 181.303,9. S1 dan S10 memiliki 4 putaran warm, S100 hanya 2.
+
+### Langkah 2 — Cocokkan hasil Spark dengan acuan (tanpa Docker)
+
+```powershell
+python analitik\cocokkan.py
+python analitik\cocokkan.py --hasil results\analitik\S10
+python analitik\cocokkan.py --hasil results\analitik\S100
+```
+
+Ketiganya harus berakhir `SEMUA TABEL COCOK`: 14 tabel, 1.130 sel pada S1 dan 1.418 sel pada S10 maupun S100 (toleransi relatif 1e-9). Perintah ini membandingkan CSV hasil Spark yang sudah di-commit dengan acuan di `analitik/referensi_S*`, sehingga tidak butuh Docker. Bila muncul `ADA SELISIH`, jangan mengubah angka; tanyakan ke Wildan.
+
+### Langkah 3 — Angka kunci Tahap 3
+
+| Pertanyaan | Jawaban | Sumber |
+|---|---|---|
+| Berapa lama satu putaran pipeline? (median warm) | S1 22,3 detik; S10 34,5; S100 128,8. Data bertambah 100 kali, waktu 5,8 kali | `ringkasan_waktu.csv` |
+| Apakah Spark menghitung dengan benar? | Ya: 14 tabel cocok dengan acuan mandiri pada S1, S10, dan S100 | `analitik\cocokkan.py` |
+| Tahap terberat di S100? | ETL 38,0 detik (29,5%); `q2_pemeriksaan` 22,8 (17,7%); `q1_kolom_kosong` 17,1 (13,3%); `a4a_area_jenis` 13,1 (10,1%) | `waktu_per_tahap.csv` |
+| Seberapa terkonsentrasi isi katalog? (S1) | Italy 63,4% anotasi, seluruhnya pada 16 Mei 2023; 9 dari 16 lokasi hanya punya satu tanggal kejadian | `S1/a3_lokasi.csv`, `S1/a3b_lokasi_tanggal.csv` |
+| Bagaimana kualitas data? (S1) | 11 dari 13 pemeriksaan bersih; 3.142 anotasi (4,2%) tanpa jenis pemicu; 109 (0,15%) tanpa tanggal | `S1/q2_pemeriksaan.csv`, `S1/q1_kolom_kosong.csv` |
+
+Isi katalog hanya bermakna di S1: S10 dan S100 adalah salinan simulasi untuk menguji waktu. Penjelasan lengkap ada di `docs/penjelasan_lengkap.md` Bagian 13 dan `analitik/README.md`.
+
+---
+
 ## RINGKASAN LOKASI FILE HASIL
 
 | Yang dicari | Berkas/folder | Cara buka |
@@ -392,3 +441,6 @@ Semua hasil sudah di-push ke GitHub dan bisa dibaca di browser:
 | Jawaban benar (wasit, hanya S1) | `bench/benar/W1_S1.csv` sampai `W6_S1.csv` | Excel |
 | Titik koordinat uji | `bench/points.json` | Notepad / `python -c "import json; ..."` |
 | Hash integritas data | `data/CHECKSUMS.txt` | Notepad |
+| Hasil Tahap 3 (14 CSV per skala) | `results/analitik/S1/`, `S10/`, `S100/` | Excel |
+| Waktu pemrosesan Tahap 3 | `results/analitik/ringkasan_waktu.csv` | Excel / `Import-Csv ...` |
+| Grafik Tahap 3 | `results/analitik/grafik/g1_tahun_jenis.png` sampai `g6_waktu.png` | Pratinjau gambar |

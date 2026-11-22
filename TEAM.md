@@ -2,7 +2,7 @@
 
 | Panggilan | Nama lengkap | NIM | GitHub | Peran | Folder |
 |---|---|---|---|---|---|
-| Wildan | Muhammad Wildan Arif Maulana | 23051204065 | [wildnrfm](https://github.com/wildnrfm) | Project Lead + Documentation/QA | `docs/`, `tests/`, berkas di akar repo |
+| Wildan | Muhammad Wildan Arif Maulana | 23051204065 | [wildnrfm](https://github.com/wildnrfm) | Project Lead + Documentation/QA; pemrosesan dan analitik Spark (Tahap 3) | `docs/`, `tests/`, `analitik/`, berkas di akar repo |
 | Syuep | Maulana Hidayah Syaif Ali Khan | 23051204068 | [Syaifalikhan](https://github.com/Syaifalikhan) | Data Collection Engineer | `data/` |
 | Elsa | Elsa Claudia Putri | 23051204038 | [ElsaCP](https://github.com/ElsaCP) | Storage A (MongoDB) memimpin; Performance Analyst membantu | `mongodb/` |
 | Sofi | Marsanda Sofi Aminarti | 23051204066 | [marsandasofi](https://github.com/marsandasofi) | Performance Analyst memimpin; Storage A (MongoDB) membantu | `bench/`, `results/` |
@@ -11,11 +11,11 @@
 
 ## Spesifikasi laptop (27 Okt 2026)
 
-Semua pengukuran waktu yang masuk laporan diukur di **satu laptop uji** (Elsa).
+Pengukuran waktu tahap penyimpanan (Bab III laporan) diukur di **satu laptop uji** (Elsa). Pengukuran waktu tahap pemrosesan dan analitik Spark (Bab IV) diukur di **laptop Wildan**, sehingga angka kedua tahap tidak dibandingkan langsung.
 
 | Panggilan | Prosesor | RAM | Disk kosong | OS | WSL memory | Catatan |
 |---|---|---|---|---|---|---|
-| Wildan | Intel i5-6200U @ 2.30 GHz | 12 GB | 42 GB | Windows | 6 GB | Docs/QA, tidak menjalankan Docker |
+| Wildan | Intel i5-6200U @ 2.30 GHz | 12 GB | 42 GB | Windows | 6 GB | Docs/QA; menjalankan Docker (HDFS dan Spark) untuk Tahap 3 dan menjadi laptop ukur Tahap 3 (saat pengukuran 19 Nov: disk kosong sekitar 26 sampai 28 GB) |
 | Syuep | AMD Ryzen 5 5500U | 6 GB | 54 GB | Windows | 3 GB | Data scripts saja (Python, tanpa Docker) |
 | Elsa | Intel i5-13420H (Gen 13) | 16 GB | 290 GB | Windows | — | **Laptop uji utama** 🏆 |
 | Sofi | Intel i3-1215U (Gen 12) | 8 GB | 58 GB | Windows | 4 GB | |

@@ -44,6 +44,7 @@ kelompok2-bigdata-storage/
 ├─ mongodb/         Docker, indeks, pemuat cadangan, kueri W1 sampai W6
 ├─ postgis/         Docker, skema, muat, indeks, kueri W1 sampai W6
 ├─ hdfs-parquet/    Docker (HDFS + Spark), CSV ke Parquet, penjalan Spark SQL
+├─ analitik/        Tahap 3: pemrosesan dan analitik Spark (ETL, 14 kueri, acuan, pencocok, grafik)
 ├─ results/         hasil uji (CSV) dan catatan pengukuran
 ├─ docs/            laporan, slide, diagram
 └─ tests/           uji tanpa Docker (python tests/uji_semua.py)
@@ -52,7 +53,7 @@ kelompok2-bigdata-storage/
 ## Tiga hal yang perlu diingat
 
 1. **Ubah hanya folder milikmu** (tabel di atas). `results/` boleh diisi siapa pun yang menjalankan uji; Sofi yang mengelola ringkasannya.
-2. **Satu penyimpanan menyala sekali waktu** di satu laptop (`docker compose stop` yang lain), dan semua waktu yang masuk laporan diukur di **satu laptop uji**.
+2. **Satu penyimpanan menyala sekali waktu** di satu laptop (`docker compose stop` yang lain), dan semua waktu tahap penyimpanan (Bab III) diukur di **satu laptop uji** (Elsa); waktu Tahap 3 (Bab IV) diukur di laptop Wildan.
 3. **Jangan `git push --force`**; jangan menaruh sandi atau data pribadi di repo; `git pull --rebase` sebelum `git push`; pesan commit diawali `[folder]`.
 
 ## Atribusi dataset

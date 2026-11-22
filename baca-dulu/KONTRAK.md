@@ -57,10 +57,10 @@ kelompok2-bigdata-storage/
 ├─ mongodb/       docker-compose.yml, indexes.js, drop_indexes.js, muat_pymongo.py, queries/_umum.js w1.js ... w6.js
 ├─ postgis/       docker-compose.yml, schema.sql, load.sql, indexes.sql, drop_indexes.sql, queries/w1.sql ... w6.sql
 ├─ hdfs-parquet/  docker-compose.yml, hadoop.env, csv_to_parquet.py, run_sql.py, sql/w1.sql ... w6.sql
-├─ analitik/      tahap 3 (pemrosesan dan analitik Spark): spark_pipeline.py, kueri_analitik.py, referensi.py, cocokkan.py, README.md
+├─ analitik/      tahap 3 (pemrosesan dan analitik Spark): spark_pipeline.py, kueri_analitik.py, fungsi_spark.py, referensi.py, referensi_S1|S10|S100/, cocokkan.py, uji_sql.py, ringkas_waktu.py, grafik.py, README.md
 ├─ bench/         kueri.py, make_points.py, points.json, kebenaran.py, benar/, harness.py, compare_counts.py,
 │                 summarize.py, catat.py
-├─ results/       CSV hasil uji (nama berisi tanggal), pengukuran_<penyimpanan>.csv, ringkasan.csv, banding.csv
+├─ results/       CSV hasil uji (nama berisi tanggal), pengukuran_<penyimpanan>.csv, ringkasan.csv, banding.csv, analitik/ (hasil tahap 3)
 ├─ tests/         uji_semua.py, buat_data_uji.py, fake_db.js, stubs/ (pustaka tiruan; tanpa Docker)
 └─ docs/          arsitektur, slide, laporan
 ```

@@ -1,6 +1,6 @@
 # Panduan Wildan (Project Lead + Dokumentasi/QA)
 
-Folder milikmu: `docs/`, `tests/`, dan berkas di akar repo (`README.md`, `TEAM.md`, `.gitignore`, `.gitattributes`).
+Folder milikmu: `docs/`, `tests/`, `analitik/` (Tahap 3, lihat [analitik/README.md](../analitik/README.md)), dan berkas di akar repo (`README.md`, `TEAM.md`, `.gitignore`, `.gitattributes`).
 Hal umum (terminal, Git, Docker, VS Code) ada di [01_PERSIAPAN_UMUM.md](01_PERSIAPAN_UMUM.md); peta seluruh pekerjaan di
 [00_ALUR_KERJA.md](00_ALUR_KERJA.md); nama dan perintah baku di [KONTRAK.md](KONTRAK.md).
 
@@ -9,7 +9,7 @@ Hal umum (terminal, Git, Docker, VS Code) ada di [01_PERSIAPAN_UMUM.md](01_PERSI
 | # | Langkah | Menunggu | Perkiraan waktu | Membuka |
 |---|---|---|---|---|
 | **2** | **Pasang paket awal, data mentah, uji, push** | - | 45 sampai 90 menit | #4 semua orang |
-| 3 | Alat: Git dan Python sudah ada (Anaconda, Python 3.13); Docker tidak wajib untukmu | - | - | - |
+| 3 | Alat: Git dan Python sudah ada (Anaconda, Python 3.13); Docker tidak wajib untuk langkah awalmu (Tahap 3 memakainya; lihat `analitik/README.md`) | - | - | - |
 | 5 | Tulis spesifikasi laptopmu di grup | - | 5 menit | #7 |
 | 6 | Cek `TEAM.md` dan tentukan jam kickoff | #4 semua | 15 menit | #7 |
 | 7 | KICKOFF (kamu memimpin) | #6 | 30 menit | #8 sampai #12, #19 |
@@ -259,7 +259,7 @@ OK     konversi_tolak_masukan_rusak (0.0 detik)
 ...
 OK     compose_dan_nama (0.1 detik)
 
-SEMUA UJI LULUS (17 uji, 15 detik)
+SEMUA UJI LULUS (22 uji, 18 detik)
 ```
 
 Baris `(node tidak ada: pemeriksaan JavaScript dilewati)` boleh muncul bila Node.js tidak terpasang; itu tidak apa-apa.

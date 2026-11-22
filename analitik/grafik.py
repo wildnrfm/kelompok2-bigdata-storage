@@ -426,7 +426,7 @@ def g6_waktu(sumber_waktu, keluar, dpi):
     for xi, yi, r in zip(x, y, baris):
         ax.plot([xi], [yi], marker="o", markersize=7, markerfacecolor=UNGU, markeredgecolor=SURF, markeredgewidth=1.6, zorder=4)
         ax.annotate("%s detik" % idn(yi, 1 if yi < 100 else 0), (xi, yi), xytext=(8, -3), textcoords="offset points",
-                    fontsize=7, color=INK2, ha="left", va="top")
+                    fontsize=7, color=INK2, ha="left", va="top", bbox=ETIKET)
     if ada_dingin:
         ax.plot(x, dingin, color=UNGU, linewidth=1.0, zorder=2, alpha=0.55)
         for xi, vi in zip(x, dingin):
