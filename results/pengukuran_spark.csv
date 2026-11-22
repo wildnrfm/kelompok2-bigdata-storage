@@ -1,0 +1,13 @@
+tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
+2026-11-22 12:10,spark,S1,ukuran_total,annotations,3.900,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S1,ukuran_dengan_replika,annotations,11.700,MiB,replikasi 2
+2026-11-22 12:10,spark,S1,ukuran_total,patches,0.064,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S1,ukuran_dengan_replika,patches,0.191,MiB,replikasi 2
+2026-11-22 12:10,spark,S10,ukuran_total,annotations,43.020,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S10,ukuran_dengan_replika,annotations,129.059,MiB,replikasi 2
+2026-11-22 12:10,spark,S10,ukuran_total,patches,0.214,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S10,ukuran_dengan_replika,patches,0.641,MiB,replikasi 2
+2026-11-22 12:10,spark,S100,ukuran_total,annotations,434.108,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S100,ukuran_dengan_replika,annotations,1302.324,MiB,replikasi 2
+2026-11-22 12:10,spark,S100,ukuran_total,patches,1.252,MiB,"satu salinan, tanpa replikasi"
+2026-11-22 12:10,spark,S100,ukuran_dengan_replika,patches,3.757,MiB,replikasi 2
