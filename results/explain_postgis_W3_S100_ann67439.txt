@@ -7,17 +7,17 @@ SET
 
                                                                                                                                                               QUERY PLAN                                                                                                                                                               
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregate  (cost=285.30..285.31 rows=1 width=8) (actual time=76.672..76.673 rows=1 loops=1)
-   Buffers: shared hit=26 read=164
-   ->  Index Scan using ann_center_gist on annotations  (cost=0.41..285.30 rows=1 width=0) (actual time=10.516..76.640 rows=12 loops=1)
+ Aggregate  (cost=582.70..582.71 rows=1 width=8) (actual time=2.771..2.772 rows=1 loops=1)
+   Buffers: shared hit=39 read=157
+   ->  Index Scan using ann_center_gist on annotations  (cost=0.41..582.70 rows=1 width=0) (actual time=0.785..2.764 rows=12 loops=1)
          Index Cond: (center && '0103000020E61000000100000005000000F17CAB1A69495240EFBF3A33E6834440F17CAB1A6949524047753A90758644409D572BC9B04A524047753A90758644409D572BC9B04A5240EFBF3A33E6834440F17CAB1A69495240EFBF3A33E6834440'::geometry)
          Filter: ((event_date >= '2017-01-29'::date) AND (event_date <= '2017-03-30'::date) AND st_intersects(center, '0103000020E61000000100000005000000F17CAB1A69495240EFBF3A33E6834440F17CAB1A6949524047753A90758644409D572BC9B04A524047753A90758644409D572BC9B04A5240EFBF3A33E6834440F17CAB1A69495240EFBF3A33E6834440'::geometry))
-         Rows Removed by Filter: 151
-         Buffers: shared hit=26 read=164
+         Rows Removed by Filter: 150
+         Buffers: shared hit=39 read=157
  Planning:
-   Buffers: shared hit=250 read=30
- Planning Time: 38.522 ms
- Execution Time: 76.760 ms
+   Buffers: shared hit=266 read=14
+ Planning Time: 11.560 ms
+ Execution Time: 2.829 ms
 (11 rows)
 
                    info                   
@@ -27,15 +27,15 @@ SET
 
                                                                                                                                                               QUERY PLAN                                                                                                                                                               
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregate  (cost=285.30..285.31 rows=1 width=8) (actual time=0.135..0.135 rows=1 loops=1)
-   Buffers: shared hit=166
-   ->  Index Scan using ann_center_gist on annotations  (cost=0.41..285.30 rows=1 width=0) (actual time=0.044..0.132 rows=12 loops=1)
+ Aggregate  (cost=582.70..582.71 rows=1 width=8) (actual time=0.137..0.138 rows=1 loops=1)
+   Buffers: shared hit=172
+   ->  Index Scan using ann_center_gist on annotations  (cost=0.41..582.70 rows=1 width=0) (actual time=0.041..0.136 rows=12 loops=1)
          Index Cond: (center && '0103000020E61000000100000005000000F17CAB1A69495240EFBF3A33E6834440F17CAB1A6949524047753A90758644409D572BC9B04A524047753A90758644409D572BC9B04A5240EFBF3A33E6834440F17CAB1A69495240EFBF3A33E6834440'::geometry)
          Filter: ((event_date >= '2017-01-29'::date) AND (event_date <= '2017-03-30'::date) AND st_intersects(center, '0103000020E61000000100000005000000F17CAB1A69495240EFBF3A33E6834440F17CAB1A6949524047753A90758644409D572BC9B04A524047753A90758644409D572BC9B04A5240EFBF3A33E6834440F17CAB1A69495240EFBF3A33E6834440'::geometry))
-         Rows Removed by Filter: 151
-         Buffers: shared hit=166
- Planning Time: 0.231 ms
- Execution Time: 0.149 ms
+         Rows Removed by Filter: 150
+         Buffers: shared hit=172
+ Planning Time: 0.159 ms
+ Execution Time: 0.148 ms
 (9 rows)
 
 SET
@@ -46,23 +46,23 @@ SET
 
                                                                    QUERY PLAN                                                                   
 ------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregate  (cost=615.91..615.92 rows=1 width=8) (actual time=15.256..15.258 rows=1 loops=1)
-   Buffers: shared hit=138 read=1
-   ->  Bitmap Heap Scan on annotations  (cost=549.38..615.90 rows=4 width=0) (actual time=15.237..15.253 rows=12 loops=1)
+ Aggregate  (cost=596.15..596.16 rows=1 width=8) (actual time=10.731..10.734 rows=1 loops=1)
+   Buffers: shared hit=117 read=1
+   ->  Bitmap Heap Scan on annotations  (cost=529.62..596.14 rows=4 width=0) (actual time=10.692..10.709 rows=12 loops=1)
          Recheck Cond: ((event_date >= $5) AND (event_date <= $6))
          Filter: st_intersects(center, st_makeenvelope($1, $2, $3, $4, 4326))
          Heap Blocks: exact=9
-         Buffers: shared hit=138 read=1
-         ->  BitmapAnd  (cost=549.38..549.38 rows=4 width=0) (actual time=15.206..15.207 rows=0 loops=1)
-               Buffers: shared hit=129 read=1
-               ->  Bitmap Index Scan on ann_center_gist  (cost=0.00..22.22 rows=757 width=0) (actual time=0.137..0.138 rows=163 loops=1)
+         Buffers: shared hit=117 read=1
+         ->  BitmapAnd  (cost=529.62..529.62 rows=4 width=0) (actual time=10.663..10.664 rows=0 loops=1)
+               Buffers: shared hit=108 read=1
+               ->  Bitmap Index Scan on ann_center_gist  (cost=0.00..22.16 rows=750 width=0) (actual time=0.058..0.059 rows=162 loops=1)
                      Index Cond: (center && st_makeenvelope($1, $2, $3, $4, 4326))
-                     Buffers: shared hit=6
-               ->  Bitmap Index Scan on ann_event_date  (cost=0.00..526.91 rows=37848 width=0) (actual time=14.864..14.864 rows=111158 loops=1)
+                     Buffers: shared hit=10
+               ->  Bitmap Index Scan on ann_event_date  (cost=0.00..507.20 rows=37477 width=0) (actual time=10.487..10.487 rows=110047 loops=1)
                      Index Cond: ((event_date >= $5) AND (event_date <= $6))
-                     Buffers: shared hit=123 read=1
- Planning Time: 0.076 ms
- Execution Time: 15.281 ms
+                     Buffers: shared hit=98 read=1
+ Planning Time: 0.085 ms
+ Execution Time: 10.752 ms
 (17 rows)
 
                    info                    
@@ -70,24 +70,24 @@ SET
  === force_generic_plan, eksekusi ke-2 ===
 (1 row)
 
-                                                                   QUERY PLAN                                                                   
-------------------------------------------------------------------------------------------------------------------------------------------------
- Aggregate  (cost=615.91..615.92 rows=1 width=8) (actual time=13.166..13.167 rows=1 loops=1)
-   Buffers: shared hit=139
-   ->  Bitmap Heap Scan on annotations  (cost=549.38..615.90 rows=4 width=0) (actual time=13.147..13.162 rows=12 loops=1)
+                                                                  QUERY PLAN                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=596.15..596.16 rows=1 width=8) (actual time=9.048..9.050 rows=1 loops=1)
+   Buffers: shared hit=118
+   ->  Bitmap Heap Scan on annotations  (cost=529.62..596.14 rows=4 width=0) (actual time=9.028..9.044 rows=12 loops=1)
          Recheck Cond: ((event_date >= $5) AND (event_date <= $6))
          Filter: st_intersects(center, st_makeenvelope($1, $2, $3, $4, 4326))
          Heap Blocks: exact=9
-         Buffers: shared hit=139
-         ->  BitmapAnd  (cost=549.38..549.38 rows=4 width=0) (actual time=13.123..13.124 rows=0 loops=1)
-               Buffers: shared hit=130
-               ->  Bitmap Index Scan on ann_center_gist  (cost=0.00..22.22 rows=757 width=0) (actual time=0.041..0.041 rows=163 loops=1)
+         Buffers: shared hit=118
+         ->  BitmapAnd  (cost=529.62..529.62 rows=4 width=0) (actual time=8.997..8.998 rows=0 loops=1)
+               Buffers: shared hit=109
+               ->  Bitmap Index Scan on ann_center_gist  (cost=0.00..22.16 rows=750 width=0) (actual time=0.057..0.057 rows=162 loops=1)
                      Index Cond: (center && st_makeenvelope($1, $2, $3, $4, 4326))
-                     Buffers: shared hit=6
-               ->  Bitmap Index Scan on ann_event_date  (cost=0.00..526.91 rows=37848 width=0) (actual time=12.868..12.868 rows=111158 loops=1)
+                     Buffers: shared hit=10
+               ->  Bitmap Index Scan on ann_event_date  (cost=0.00..507.20 rows=37477 width=0) (actual time=8.684..8.684 rows=110047 loops=1)
                      Index Cond: ((event_date >= $5) AND (event_date <= $6))
-                     Buffers: shared hit=124
- Planning Time: 0.026 ms
- Execution Time: 13.192 ms
+                     Buffers: shared hit=99
+ Planning Time: 0.023 ms
+ Execution Time: 9.078 ms
 (17 rows)
 

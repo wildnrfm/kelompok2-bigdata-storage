@@ -19,3 +19,5 @@ tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
 2026-11-07 12:57,postgis,S100,ukuran_indeks,patches,22.406,MiB,
 2026-11-07 12:57,postgis,S100,ukuran_total,patches,87.188,MiB,pg_total_relation_size (termasuk TOAST)
 2026-11-07 12:59,postgis,S100,tambah_batch,annotations+patches,4.461,detik,
+2026-11-25 10:59,postgis,S100,muat,annotations+patches,86.885,detik,ukur ulang 25 Nov
+2026-11-25 11:00,postgis,S100,indeks,semua,46.934,detik,ukur ulang 25 Nov

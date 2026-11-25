@@ -10,7 +10,7 @@
 
    relname   |  baris  | relpages | relallvisible 
 -------------+---------+----------+---------------
- annotations | 7494838 |   315906 |        315906
+ annotations | 7495470 |   315906 |        315906
 (1 row)
 
          relname          |          last_vacuum          |         last_analyze          |        last_autovacuum        |       last_autoanalyze        
@@ -23,13 +23,14 @@
  faces                    |                               |                               |                               | 
  county                   |                               |                               |                               | 
  street_type_lookup       |                               |                               |                               | 2026-11-06 12:33:25.685866+00
- annotations              | 2026-11-07 05:57:17.251064+00 | 2026-11-07 05:57:17.645787+00 |                               | 
  addr                     |                               |                               |                               | 
  geocode_settings         |                               |                               |                               | 
  spatial_ref_sys          |                               | 2026-11-06 12:32:54.033869+00 | 2026-11-06 12:33:25.446271+00 | 2026-11-06 12:33:25.659951+00
  place_lookup             |                               |                               |                               | 
+ patches                  | 2026-11-25 04:00:37.225365+00 | 2026-11-25 04:00:37.6798+00   | 2026-11-25 04:00:04.190434+00 | 2026-11-25 04:00:04.709729+00
  cousub                   |                               |                               |                               | 
  topology                 |                               |                               |                               | 
+ annotations              | 2026-11-25 04:00:36.750596+00 | 2026-11-25 04:00:37.207713+00 |                               | 
  zip_lookup_base          |                               |                               |                               | 
  direction_lookup         |                               |                               |                               | 
  tabblock20               |                               |                               |                               | 
@@ -46,7 +47,6 @@
  state_lookup             |                               |                               | 2026-11-06 12:33:25.678496+00 | 2026-11-06 12:33:25.679669+00
  loader_platform          |                               |                               |                               | 
  zip_lookup_all           |                               |                               |                               | 
- patches                  | 2026-11-07 05:57:17.694262+00 | 2026-11-07 05:57:18.018505+00 | 2026-11-06 12:41:28.313006+00 | 
  geocode_settings_default |                               |                               |                               | 
  layer                    |                               |                               |                               | 
  featnames                |                               |                               |                               | 
