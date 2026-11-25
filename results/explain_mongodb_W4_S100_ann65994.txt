@@ -1,0 +1,16 @@
+Titik uji ann_id 65994: Italy, Rainfall (11.9641825, 44.0044926)
+
+== 1. rencana bawaan (plan cache dikosongkan dulu)
+  tahap rencana : FETCH > IXSCAN
+  indeks dipakai: bbox_2dsphere
+  dikembalikan 386474, kunci diperiksa 864992, dokumen diperiksa 505037, 22862 ms
+  rencana ditolak: event_type_1_dates.event_1 | event_type_1_dates.event_1 | bbox_2dsphere
+
+== 2. dipaksa memakai indeks bbox_2dsphere
+  tahap rencana : FETCH > IXSCAN
+  indeks dipakai: bbox_2dsphere
+  dikembalikan 386474, kunci diperiksa 864992, dokumen diperiksa 505037, 18306 ms
+  rencana ditolak: tidak ada
+
+== 3. countDocuments seperti harness (plan cache dikosongkan dulu)
+  countDocuments: 386474 hasil, 18882 ms

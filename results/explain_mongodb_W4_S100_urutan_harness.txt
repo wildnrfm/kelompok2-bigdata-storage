@@ -1,0 +1,16 @@
+Urutan harness W4 S100: titik 1, 2, 3 dengan countDocuments, plan cache kosong di awal
+
+== titik 1 (Rainfall)
+  countDocuments: 0 hasil, 927 ms
+  isi plan cache: 1 entri
+   - indeks bbox_2dsphere; aktif=false; works=80542
+
+== titik 2 (Tropical Storm)
+  countDocuments: 0 hasil, 9 ms
+  isi plan cache: 1 entri
+   - indeks bbox_2dsphere; aktif=true; works=1
+
+== titik 3 (Rainfall)
+  countDocuments: 32880 hasil, 160022 ms
+  isi plan cache: 1 entri
+   - indeks event_type_1_dates.event_1; aktif=false; works=2

@@ -32,3 +32,5 @@ tanggal,penyimpanan,skala,jenis,objek,nilai,satuan,catatan
 2026-11-07 00:29,mongodb,S100,ukuran_total,patches,29.539,MiB,storageSize + totalIndexSize
 2026-11-07 00:32,mongodb,S100,tambah_batch,annotations,42.074,detik,
 2026-11-07 00:32,mongodb,S100,tambah_batch,patches,0.731,detik,
+2026-11-25 11:22,mongodb,S100,muat,annotations+patches,912.500,detik,dari keluaran terminal sesi muat S100 7 Nov (muat_pymongo.py); dicatat susulan 25 Nov
+2026-11-25 11:22,mongodb,S100,indeks,semua,242.400,detik,"dari keluaran terminal sesi yang sama (indexes.js, total waktu bangun indeks); dicatat susulan 25 Nov"

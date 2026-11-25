@@ -1,0 +1,16 @@
+Titik uji ann_id 14260: Hiroshima, Rainfall (132.7918267, 34.3414333)
+
+== 1. rencana bawaan (plan cache dikosongkan dulu)
+  tahap rencana : FETCH > IXSCAN
+  indeks dipakai: event_type_1_dates.event_1
+  dikembalikan 32880, kunci diperiksa 5321286, dokumen diperiksa 5321286, 170020 ms
+  rencana ditolak: bbox_2dsphere
+
+== 2. dipaksa memakai indeks bbox_2dsphere
+  tahap rencana : FETCH > IXSCAN
+  indeks dipakai: bbox_2dsphere
+  dikembalikan 32880, kunci diperiksa 169121, dokumen diperiksa 55244, 943 ms
+  rencana ditolak: tidak ada
+
+== 3. countDocuments seperti harness (plan cache dikosongkan dulu)
+  countDocuments: 32880 hasil, 163503 ms
