@@ -1,0 +1,58 @@
+﻿ plan_cache_mode 
+-----------------
+ auto
+(1 row)
+
+ shared_buffers 
+----------------
+ 256MB
+(1 row)
+
+   relname   |  baris  | relpages | relallvisible 
+-------------+---------+----------+---------------
+ annotations | 7494838 |   315906 |        315906
+(1 row)
+
+         relname          |          last_vacuum          |         last_analyze          |        last_autovacuum        |       last_autoanalyze        
+--------------------------+-------------------------------+-------------------------------+-------------------------------+-------------------------------
+ tract                    |                               |                               |                               | 
+ zip_state                |                               |                               |                               | 
+ zip_lookup               |                               |                               |                               | 
+ pagc_rules               |                               |                               | 2026-11-06 12:33:25.88567+00  | 2026-11-06 12:33:25.896583+00
+ state                    |                               |                               |                               | 
+ faces                    |                               |                               |                               | 
+ county                   |                               |                               |                               | 
+ street_type_lookup       |                               |                               |                               | 2026-11-06 12:33:25.685866+00
+ annotations              | 2026-11-07 05:57:17.251064+00 | 2026-11-07 05:57:17.645787+00 |                               | 
+ addr                     |                               |                               |                               | 
+ geocode_settings         |                               |                               |                               | 
+ spatial_ref_sys          |                               | 2026-11-06 12:32:54.033869+00 | 2026-11-06 12:33:25.446271+00 | 2026-11-06 12:33:25.659951+00
+ place_lookup             |                               |                               |                               | 
+ cousub                   |                               |                               |                               | 
+ topology                 |                               |                               |                               | 
+ zip_lookup_base          |                               |                               |                               | 
+ direction_lookup         |                               |                               |                               | 
+ tabblock20               |                               |                               |                               | 
+ countysub_lookup         |                               |                               |                               | 
+ loader_lookuptables      |                               |                               |                               | 
+ addrfeat                 |                               |                               |                               | 
+ bg                       |                               |                               |                               | 
+ zcta5                    |                               |                               |                               | 
+ county_lookup            |                               |                               |                               | 
+ loader_variables         |                               |                               |                               | 
+ tabblock                 |                               |                               |                               | 
+ place                    |                               |                               |                               | 
+ edges                    |                               |                               |                               | 
+ state_lookup             |                               |                               | 2026-11-06 12:33:25.678496+00 | 2026-11-06 12:33:25.679669+00
+ loader_platform          |                               |                               |                               | 
+ zip_lookup_all           |                               |                               |                               | 
+ patches                  | 2026-11-07 05:57:17.694262+00 | 2026-11-07 05:57:18.018505+00 | 2026-11-06 12:41:28.313006+00 | 
+ geocode_settings_default |                               |                               |                               | 
+ layer                    |                               |                               |                               | 
+ featnames                |                               |                               |                               | 
+ secondary_unit_lookup    |                               |                               |                               | 
+ zip_state_loc            |                               |                               |                               | 
+ pagc_lex                 |                               |                               | 2026-11-06 12:33:25.842939+00 | 2026-11-06 12:33:25.854707+00
+ pagc_gaz                 |                               |                               |                               | 2026-11-06 12:33:25.835712+00
+(39 rows)
+
