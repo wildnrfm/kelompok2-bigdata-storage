@@ -35,13 +35,14 @@ Tanda `[x]` dipasang bila ada jejaknya di repo (hasil di `results/`, wasit di `b
 - [ ] #19 sampai #24 Dokumen rancangan, slide pitching, tinjau silang, latihan (SINKRON 2)
 - [x] #25 W1 sampai W6 benar di S1 di ketiganya (`compare_counts.py` dengan wasit: semua cocok)
 - [x] #26 S10 dan S100 termuat di ketiganya (laptop uji)
-- [ ] #27 W1 sampai W8, E1, E2 dijalankan (W7 belum lengkap: waktu muat dan waktu indeks S100 belum tercatat; ukuran Parquet sudah terukur pada 22 Nov di `results/pengukuran_spark.csv`)
+- [ ] #27 W1 sampai W8, E1, E2 dijalankan (W7: waktu muat dan waktu indeks S100 tercatat 25 Nov di `results/pengukuran_mongodb.csv` dan `results/pengukuran_postgis.csv`, ukuran Parquet 22 Nov di `results/pengukuran_spark.csv`; belum tercatat: waktu muat S1 dan S10, waktu indeks S1, dan W8 Spark)
 - [x] #28 Uji silang jumlah hasil di S10 dan S100 (`results/uji_silang_S10_S100.txt`; satu selisih diketahui: S100 W2 titik 19)
+- [x] Penelusuran rencana kueri (25 Nov 2026): median W3 S100 PostGIS (rencana generik) dan ekor p95 W4 S100 MongoDB (indeks yang dipilih planner) dijelaskan dengan `EXPLAIN` dan `explain` (`results/explain_*.txt`; `python bench/ringkas_explain.py` menulis `results/ringkasan_explain.csv`; `docs/penjelasan_lengkap.md` Bagian 7.6). Seri utama tidak diubah
 - [x] #29 Tabel, grafik, hipotesis H1 sampai H5 (`docs/penjelasan_lengkap.md`)
 - [x] Tahap 3 (pemrosesan dan analitik): kode, 14 kueri, acuan S1, S10, S100, dan uji tanpa Docker selesai (`analitik/`)
 - [x] Tahap 3: S1, S10, dan S100 dijalankan di Spark 3.5.0 sungguhan (laptop Wildan, sesi resmi 19 Nov 2026) dan `analitik\cocokkan.py` menjawab `SEMUA TABEL COCOK` pada ketiganya (14 tabel; 1.130 sel pada S1, 1.418 sel pada S10 dan S100)
 - [x] Tahap 3: waktu pemrosesan S1, S10, S100 tercatat di laptop Wildan (`results/analitik/ringkasan_waktu.csv`): median putaran warm 22,3, 34,5, dan 128,8 detik
-- [ ] #30 Laporan dan slide hasil (laporan Bab I sampai V sudah ditulis, termasuk Bab IV untuk Tahap 3; menunggu pemeriksaan akhir, dan slide belum dibuat)
+- [ ] #30 Laporan dan slide hasil (laporan Bab I sampai V sudah ditulis, termasuk Bab IV untuk Tahap 3 dan subbab 3.2.1 hasil penelusuran rencana kueri; slide akhir 17 halaman sudah disusun; menunggu pemeriksaan akhir)
 - [ ] #31 QA akhir dan kumpul di SIDIA
 
 ## Susunan repo
@@ -51,7 +52,7 @@ kelompok2-bigdata-storage/
 ├─ README.md  TEAM.md  .gitignore  .gitattributes
 ├─ baca-dulu/       panduan: alur kerja, persiapan umum, kontrak teknis, panduan per orang, pemecahan masalah
 ├─ data/            konverter, generator skala S10/S100, pemeriksa, kamus data; raw/ = berkas sumber (di-commit)
-├─ bench/           definisi kueri, harness, 100 titik uji, wasit jawaban benar, pembanding, ringkasan, pencatat
+├─ bench/           definisi kueri, harness, 100 titik uji, wasit jawaban benar, pembanding, ringkasan, pencatat, ringkasan EXPLAIN
 ├─ mongodb/         Docker, indeks, pemuat cadangan, kueri W1 sampai W6
 ├─ postgis/         Docker, skema, muat, indeks, kueri W1 sampai W6
 ├─ hdfs-parquet/    Docker (HDFS + Spark), CSV ke Parquet, penjalan Spark SQL

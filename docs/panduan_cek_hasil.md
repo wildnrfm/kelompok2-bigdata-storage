@@ -14,13 +14,15 @@
 
 > **Catatan revisi (21 Nov 2026).** Ditambahkan **CARA 10** (cek hasil Tahap 3, pemrosesan dan analitik Spark di `results/analitik/`) dan jumlah uji otomatis diperbarui menjadi 22. Cara 1 sampai 9 tidak berubah.
 
+> **Catatan revisi (26 Nov 2026).** Ditambahkan **CARA 11** (cek penelusuran rencana kueri, 25 Nov 2026). Enam berkas hasil baru (`20261125_postgis_*`) ikut dihitung: `ringkasan.csv` kini 80 grup dan `banding.csv` 34 baris, dari 96 berkas (31.026 baris; 30.066 dipakai). Angka seri utama (6 dan 7 Nov) tidak berubah; grup tambahan ditandai kolom `varian` = `bawaan` atau `custom-plan`. Waktu muat dan waktu indeks S100 kini tercatat (CARA 4).
+
 ---
 
 ## CARA 1: BUKA RINGKASAN UTAMA (PALING CEPAT)
 
 ### Berkas: `results/ringkasan.csv`
 
-Ini **satu berkas terpenting**: tabel ringkasan semua hasil benchmark. Setiap baris mewakili satu kombinasi unik: satu penyimpanan × satu beban kerja × satu skala × satu kondisi. Isinya 74 grup, dihitung dari 90 berkas hasil tanggal 6 dan 7 Nov. Berkas 2 Nov ada di `results/arsip/` dan tidak ikut dihitung.
+Ini **satu berkas terpenting**: tabel ringkasan semua hasil benchmark. Setiap baris mewakili satu kombinasi unik: satu penyimpanan × satu beban kerja × satu skala × satu kondisi. Isinya 80 grup, dihitung dari 96 berkas hasil (90 berkas tanggal 6 dan 7 Nov, ditambah 6 berkas 25 Nov). Berkas 2 Nov ada di `results/arsip/` dan tidak ikut dihitung. Enam grup terakhir adalah varian rencana kueri PostGIS (`varian` = `bawaan` atau `custom-plan`; CARA 11); seri utama tidak berubah.
 
 **Cara membukanya:**
 ```powershell
@@ -43,7 +45,7 @@ python -c "import csv; [print(r) for r in csv.DictReader(open('results/ringkasan
 | `skala` | Volume data: `S1`, `S10`, atau `S100` |
 | `cold_warm` | `warm` atau `cold`. Baris `cold` menggabungkan semua ulangan, padahal hanya ulangan 1 yang dingin (lihat CARA 5) |
 | `konkurensi` | Jumlah klien serentak (kosong = 1 klien) |
-| `varian` | `tanpa-indeks` untuk E1; kosong = normal |
+| `varian` | `tanpa-indeks` untuk E1; `bawaan` dan `custom-plan` untuk pengulangan PostGIS 25 Nov (CARA 11); kosong = seri utama |
 | `ulangan_n` | Jumlah ulangan |
 | `kueri_n` | Jumlah kueri yang dihitung (titik × ulangan × klien). Di S100 hanya titik 1 sampai 20 |
 | `median_ms` | **Latensi median dalam milidetik** ← angka utama |
@@ -66,7 +68,7 @@ python -c "import csv; [print(r) for r in csv.DictReader(open('results/ringkasan
 
 ### Berkas: `results/banding.csv`
 
-Berkas ini menampilkan **tiga penyimpanan berdampingan** untuk skenario yang sama (28 baris). Ini yang paling mudah dibaca untuk menjawab "siapa paling cepat di kondisi X?".
+Berkas ini menampilkan **tiga penyimpanan berdampingan** untuk skenario yang sama (34 baris; 6 di antaranya varian rencana kueri 25 Nov). Ini yang paling mudah dibaca untuk menjawab "siapa paling cepat di kondisi X?".
 
 **Cara membukanya:**
 ```powershell
@@ -81,7 +83,7 @@ Import-Csv results\banding.csv | Format-Table -AutoSize
 | `skala` | S1, S10, S100 |
 | `cold_warm` | warm atau cold |
 | `konkurensi` | Jumlah klien (kosong = 1) |
-| `varian` | Kosong (normal) atau `tanpa-indeks` |
+| `varian` | Kosong (normal), `tanpa-indeks`, `bawaan`, atau `custom-plan` |
 | `median_ms_mongodb` | Latensi median MongoDB (ms) |
 | `median_ms_postgis` | Latensi median PostGIS (ms) |
 | `median_ms_spark` | Latensi median Spark (ms); kosong bila tidak diuji |
@@ -99,13 +101,13 @@ W5, S100, warm → mongodb=6869.304, postgis=1141.604, spark=1293.227 → tercep
 ```
 Artinya: untuk agregasi seluruh tabel 7,5 juta baris, PostGIS paling cepat. Spark (1.293 ms) lebih cepat dari MongoDB (6.869 ms) tetapi masih sedikit di belakang PostGIS.
 
-**Ringkasan 18 skenario utama** (6 beban × 3 skala, warm, tanpa varian): PostGIS tercepat pada 15; MongoDB tercepat pada W3 S100, W6 S1, dan W6 S10; Spark tidak pernah tercepat.
+**Ringkasan 18 skenario utama** (6 beban × 3 skala, warm, tanpa varian): PostGIS tercepat pada 15; MongoDB tercepat pada W3 S100, W6 S1, dan W6 S10; Spark tidak pernah tercepat. Keunggulan MongoDB di W3 S100 muncul karena PostGIS memakai rencana generik: dengan rencana kustom PostGIS 0,79 ms (CARA 11), sehingga PostGIS tercepat pada 16 dari 18.
 
 ---
 
 ## CARA 3: CEK HASIL MENTAH PER KUERI
 
-### Folder: `results/*.csv` (90 berkas)
+### Folder: `results/*.csv` (96 berkas)
 
 Setiap berkas adalah rekaman **mentah per kueri** dari satu sesi benchmark. Nama berkas mengikuti pola:
 ```
@@ -123,6 +125,7 @@ Akhiran `_k` (k = 2, 3, ...) menandai **sesi ke-k** untuk kombinasi yang sama pa
 **Berkas resmi (dijalankan di laptop uji tim, mesin Elsa; CSV tidak mencatat nama mesin):**
 - `20261106_` (56 berkas) → warm W1 sampai W6 untuk ketiga penyimpanan dan semua skala, ditambah E1 W2 dan W3 MongoDB
 - `20261107_` (34 berkas) → cold (W3 dan W5), multi-klien (W1 S100), dan E1 lainnya
+- `20261125_` (6 berkas) → pengulangan PostGIS W2, W3, dan W4 pada S100 (warm, 20 titik, 3 ulangan) dengan `varian=bawaan` dan `varian=custom-plan`, untuk penelusuran rencana kueri (CARA 11)
 - Berkas `20261102_` (21 berkas, S1) ada di `results/arsip/` dan tidak dihitung
 
 **Kolom di dalam berkas mentah:**
@@ -167,7 +170,7 @@ print(df['waktu_ms'].describe())
 
 ### Berkas: `results/pengukuran_mongodb.csv`
 
-Berisi ukuran fisik MongoDB di disk per skala, waktu indeks, dan waktu tambah batch.
+Berisi ukuran fisik MongoDB di disk per skala, waktu indeks, waktu muat S100, dan waktu tambah batch.
 
 **Kolom:** `tanggal`, `penyimpanan`, `skala`, `jenis`, `objek`, `nilai`, `satuan`, `catatan`
 
@@ -177,7 +180,8 @@ Nilai `jenis` yang ada:
 - `ukuran_data_di_disk` — ukuran data terkompresi di disk (MiB)
 - `ukuran_indeks` — ukuran semua indeks (MiB)
 - `ukuran_total` — data di disk + indeks (MiB)
-- `indeks` — waktu membangun semua indeks (detik); hanya tercatat untuk S10
+- `indeks` — waktu membangun semua indeks (detik); tercatat untuk S10 dan S100 (S1 tidak tercatat)
+- `muat` — waktu muat massal (detik); hanya S100, `objek` = `annotations+patches`, dicatat 25 Nov 2026
 - `tambah_batch` — W8: waktu menambah satu batch ke S100 (detik)
 
 `objek` berisi `annotations`, `patches`, atau `semua`.
@@ -195,7 +199,8 @@ Sama seperti di atas, untuk PostGIS. Nilai `jenis`:
 - `ukuran_data_di_disk` — ukuran tabel (heap) (MiB)
 - `ukuran_indeks` — ukuran indeks GiST dan B-Tree (MiB)
 - `ukuran_total` — total termasuk TOAST, dari `pg_total_relation_size` (MiB)
-- `indeks` — waktu membangun semua indeks (detik); hanya tercatat untuk S10
+- `indeks` — waktu membangun semua indeks (detik); tercatat untuk S10 dan S100 (S1 tidak tercatat)
+- `muat` — waktu muat massal (detik); hanya S100, `objek` = `annotations+patches`, dicatat 25 Nov 2026
 - `tambah_batch` — W8: waktu menambah satu batch ke S100 (detik), `annotations` + `patches`
 
 ### Berkas: `results/pengukuran_mentah.csv`
@@ -213,7 +218,7 @@ Ukuran berkas mentah (CSV dan NDJSON) per skala, sebagai referensi sebelum dimua
 ### Yang belum ada di `results/`
 
 - W8 Spark (waktu tambah batch ke S100) belum tercatat. Ukuran Parquet sudah ada di `pengukuran_spark.csv` (diukur 22 Nov 2026 di laptop Wildan); angka lama "Parquet ≈ 470 MiB" diganti angka terukur 435,36 MiB.
-- Waktu muat (`jenis` = `muat`) untuk semua penyimpanan, dan waktu indeks S100. Cara mencatat ada di docstring `bench\catat.py`.
+- Waktu muat (`jenis` = `muat`) S1 dan S10, dan waktu indeks S1. Waktu muat dan waktu indeks S100 sudah tercatat 25 Nov 2026 (MongoDB 912,5 dan 242,4 detik; PostGIS 86,9 dan 46,9 detik; indeks MongoDB 5,2× lebih lama). Waktu MongoDB dicatat susulan dari keluaran terminal sesi pemuatan 7 Nov dan tidak diukur ulang; waktu PostGIS diukur ulang 25 Nov setelah S100 dimuat ulang. Waktu muat MongoDB memakai `muat_pymongo.py` (bukan `mongoimport`), jadi tidak setara dengan `COPY` pada PostGIS. Cara mencatat ada di docstring `bench\catat.py`.
 
 ---
 
@@ -240,7 +245,7 @@ Bandingkan `median_ms_mongodb` di baris `tanpa-indeks` dengan baris normal (vari
 
 ### Cold Run — Efek Cache Dingin
 
-Cold run disimpan satu ulangan per berkas. Pola waktunya menunjukkan **hanya ulangan 1 yang benar-benar dingin**: ulangan 2 dan 3 sering jauh lebih cepat (contoh PostGIS W3 S100: 11,586 ms lalu 2,414 dan 2,447 ms). Baris `cold` di `ringkasan.csv` dan `banding.csv` menggabungkan ketiga ulangan, jadi lihat ulangan 1 dari berkas mentah:
+Cold run disimpan satu ulangan per berkas. Pola waktunya menunjukkan **hanya ulangan 1 yang benar-benar dingin**: ulangan 2 dan 3 sering jauh lebih cepat (contoh PostGIS W3 S100: 11,586 ms lalu 2,414 dan 2,447 ms; sebabnya sebagian adalah peralihan ke rencana generik, lihat CARA 11). Baris `cold` di `ringkasan.csv` dan `banding.csv` menggabungkan ketiga ulangan, jadi lihat ulangan 1 dari berkas mentah:
 
 ```python
 import glob
@@ -254,7 +259,7 @@ print(dingin.groupby(['penyimpanan', 'beban_kerja', 'skala'])['waktu_ms'].median
 
 Hasil yang benar (ms): MongoDB W3 S10 4,000; W3 S100 16,062; W5 S10 1.176,506; W5 S100 4.486,238. PostGIS W3 S10 0,804; W3 S100 11,586; W5 S10 74,190; W5 S100 838,717.
 
-Lima dari delapan rasio cold ÷ warm di bawah 1 (cold lebih cepat dari warm), termasuk keempat skenario PostGIS. Itu tidak masuk akal bila cold benar-benar dingin: **dugaan** restart container tidak mengosongkan cache sistem operasi di mesin virtual Docker, atau sesi warm terganggu. Median warm PostGIS W3 S100 (12,956 ms) paling dicurigai dan perlu diukur ulang. Rinciannya ada di `docs/penjelasan_lengkap.md` Bagian 7.5.
+Lima dari delapan rasio cold ÷ warm di bawah 1 (cold lebih cepat dari warm), termasuk keempat skenario PostGIS. Itu tidak masuk akal bila cold benar-benar dingin: **dugaan** restart container tidak mengosongkan cache sistem operasi di mesin virtual Docker, atau sesi warm terganggu. Median warm PostGIS W3 S100 (12,956 ms) paling dicurigai; penelusuran 25 Nov menunjukkan sebabnya, yaitu rencana generik (CARA 11). Untuk tiga skenario PostGIS lain dan MongoDB W5 S100 penjelasannya belum diperiksa. Rinciannya ada di `docs/penjelasan_lengkap.md` Bagian 7.5 dan 7.6.
 
 ### Multi-client — Efek Konkurensi
 
@@ -284,7 +289,7 @@ cd C:\proyek\kelompok2-bigdata-storage
 python bench\summarize.py --titik-maks 20
 ```
 
-`summarize.py` membaca berkas `results\*.csv` saja (tidak masuk ke `results\arsip\`). `--titik-maks 20` membatasi S100 pada `kueri_id` 1 sampai 20; opsi `--titik-skala S100,S10` mengubah skala yang dibatasi.
+`summarize.py` membaca berkas `results\*.csv` saja (tidak masuk ke `results\arsip\`, dan melewati `banding.csv` serta berkas berawalan `ringkasan` dan `pengukuran_`). `--titik-maks 20` membatasi S100 pada `kueri_id` 1 sampai 20; opsi `--titik-skala S100,S10` mengubah skala yang dibatasi.
 
 Keluaran (dipotong). Tabel ringkasan dicetak lebih dulu, lalu baris penutup:
 ```
@@ -292,7 +297,7 @@ simpan    beban skala c/w   konk varian         ul  kueri  median_ms     ul_min 
 mongodb   W1    S1    warm     - -               3    300      1.503      0.984      2.752      3.417     0
 ...
 Pembatasan titik: skala S100 hanya kueri_id 1 sampai 20 (--titik-maks).
-Tertulis: results/ringkasan.csv (74 kelompok) dan results/banding.csv (28 baris), dari 90 berkas
+Tertulis: results/ringkasan.csv (80 kelompok) dan results/banding.csv (34 baris), dari 96 berkas
 ```
 
 Bila angkanya berbeda (misalnya "dari 111 berkas"), berkas 2 Nov belum dipindah ke `results\arsip\`.
@@ -353,7 +358,7 @@ Semua hasil sudah di-push ke GitHub dan bisa dibaca di browser:
 1. **Buka repositori:** `https://github.com/wildnrfm/kelompok2-bigdata-storage`
 
 2. **Buka folder `results/`:**
-   - Terlihat 90 berkas CSV hasil benchmark, ditambah `ringkasan.csv`, `banding.csv`, `pengukuran_*.csv`, `uji_silang_S10_S100.txt`, dan folder `arsip/`
+   - Terlihat 96 berkas CSV hasil benchmark, ditambah `ringkasan.csv`, `banding.csv`, `ringkasan_explain.csv`, `pengukuran_*.csv`, berkas `explain_*.txt`, `uji_silang_S10_S100.txt`, dan folder `arsip/`
    - Klik `banding.csv`: GitHub menampilkannya sebagai tabel
    - Klik `ringkasan.csv`: idem
 
@@ -368,14 +373,16 @@ Semua hasil sudah di-push ke GitHub dan bisa dibaca di browser:
 | Pertanyaan | Jawaban | Sumber |
 |---|---|---|
 | Tercepat untuk kueri jendela (W2 S100)? | **PostGIS 1,2 ms**; MongoDB 8,8 ms; Spark 546 ms (PostGIS ≈ 454× lebih cepat dari Spark) | `banding.csv` baris W2/S100/warm |
-| Tercepat untuk kotak pembatas (W4 S100)? | **PostGIS 33,0 ms** vs MongoDB 640,0 ms (19,4× lebih cepat). p95 MongoDB 206 detik, hanya dari dua titik (3 dan 20) | `banding.csv`, `ringkasan.csv` baris W4/S100 |
+| Tercepat untuk kotak pembatas (W4 S100)? | **PostGIS 33,0 ms** vs MongoDB 640,0 ms (19,4× lebih cepat). p95 MongoDB 206 detik, hanya dari dua titik (3 dan 20); sebabnya planner memilih indeks `event_type` + tanggal, bukan `bbox_2dsphere` (CARA 11) | `banding.csv`, `ringkasan.csv` baris W4/S100 |
 | Seberapa besar manfaat indeks? (E1, S10, W2) | MongoDB 1.119,7 → 2,46 ms (**455×**); PostGIS 213,9 → 0,91 ms (**235×**) | `banding.csv` baris W2/S10 |
 | Paling hemat disk (S100)? | **Parquet 435,36 MiB < MongoDB 1.861,96 MiB < PostGIS 3.497,09 MiB** (Parquet 4,3× dan 8,0× lebih kecil; MongoDB 1,88× lebih kecil dari PostGIS; Parquet tanpa indeks, dua lainnya termasuk indeks) | `pengukuran_spark.csv`, `pengukuran_mongodb.csv`, `pengukuran_postgis.csv` |
 | Kapan Spark lebih cepat dari MongoDB? | W5 S100: Spark 1.293 ms vs MongoDB 6.869 ms (5,3×), tetapi PostGIS (1.142 ms) lebih cepat dari Spark. Di W6 S100 MongoDB (131,7 ms) lebih cepat dari Spark (531,2 ms) | `banding.csv` baris W5/S100 dan W6/S100 |
 | Stabil saat 50 klien serentak? | p95 50 klien ÷ p95 1 klien (titik 1 sampai 20): MongoDB 5,1×, PostGIS 8,2×, keduanya di bawah batas 10×. Pada 100 klien 10,7× dan 25,4×. Klien = thread Python di satu laptop | `ringkasan.csv` filter W1/S100/warm |
 | Apakah jumlah hasil sama di ketiganya? | Ya, kecuali satu kueri: S100 W2 titik 19 (MongoDB 1.401; lainnya 1.400) | `results/uji_silang_S10_S100.txt` |
 | Hipotesis mana yang diterima? | H1 sebagian, H2 diterima, H3 ditolak sebagian (Parquet paling kecil sesuai dugaan, tetapi urutan MongoDB dan PostGIS terbalik), H4 sebagian, H5 diterima dengan catatan | `docs/penjelasan_lengkap.md` Bagian 8 |
-| Total yang diuji? | 90 berkas CSV (30.666 baris; 29.706 dipakai di ringkasan), 74 grup, 0 galat | `ringkasan.csv` kolom `galat_n` |
+| Total yang diuji? | 96 berkas CSV (31.026 baris; 30.066 dipakai di ringkasan), 80 grup, 0 galat | `ringkasan.csv` kolom `galat_n` |
+| Mengapa median PostGIS W3 S100 (13,0 ms) lebih lambat dari MongoDB? | Rencana generik: pada `EXPLAIN` median 13,204 ms (generik) lawan 0,356 ms (kustom), 37,1× lebih lambat; pada harness dengan rencana kustom median W3 S100 = 0,79 ms | `ringkasan_explain.csv`, `banding.csv` baris varian |
+| Mengapa p95 MongoDB W4 S100 setinggi 206 detik? | Titik 3, 20, dan 19: planner memilih `event_type_1_dates.event_1` (5,3 juta kunci, titik 19: 1,0 juta); dengan `hint("bbox_2dsphere")` 170,0 → 0,94 detik (titik 3), 190,3 → 1,20 (titik 20), 22,2 → 3,6 (titik 19). Median W4 S100 tidak berubah | `ringkasan_explain.csv` |
 
 ---
 
@@ -426,17 +433,63 @@ Isi katalog hanya bermakna di S1: S10 dan S100 adalah salinan simulasi untuk men
 
 ---
 
+## CARA 11: CEK PENELUSURAN RENCANA KUERI (25 NOV 2026)
+
+Dua angka pada seri utama tampak janggal: median W3 S100 PostGIS (12,956 ms) dan ekor p95 W4 S100 MongoDB (206.458 ms). Keduanya ditelusuri dengan `EXPLAIN` pada 25 Nov 2026 di laptop uji (laptop Elsa). Seri utama tidak diubah; hasil penelusuran ada di berkas terpisah. Penjelasan lengkap: `docs/penjelasan_lengkap.md` Bagian 7.6 dan subbab 3.2.1 laporan.
+
+### Isi `results/` untuk penelusuran ini
+
+| Yang dicari | Berkas |
+|---|---|
+| `EXPLAIN (ANALYZE, BUFFERS)` W3 S100 PostGIS, 15 titik, dua kali tiap rencana (kustom dan generik) | `results/explain_postgis_W3_S100_ann<ID>.txt` (ID = `ann_id` titik; nomor titik ada di `bench/points.json`) |
+| Keadaan server saat `EXPLAIN` PostGIS dijalankan | `results/explain_postgis_W3_S100_keadaan.txt` |
+| `explain("executionStats")` W4 S100 MongoDB, 7 titik (rencana bawaan, rencana dengan `hint`, `countDocuments`) | `results/explain_mongodb_W4_S100_ann<ID>.txt` |
+| Putar ulang urutan harness MongoDB (titik 1, 2, 3 dan plan cache) | `results/explain_mongodb_W4_S100_urutan_harness.txt` |
+| Pengulangan harness PostGIS W2, W3, W4 S100 (bawaan dan rencana kustom) | `results/20261125_postgis_W*_S100*.csv` (enam berkas; kolom `catatan` = `varian=bawaan` atau `varian=custom-plan`) |
+| Ringkasan semua `EXPLAIN` dan `explain` (81 baris) | `results/ringkasan_explain.csv` (dibuat oleh `bench/ringkas_explain.py`) |
+
+### Langkah 1 — Buat ulang ringkasan EXPLAIN
+
+```powershell
+python bench\ringkas_explain.py
+```
+
+Tidak butuh Docker. Skrip membaca `results\explain_*.txt` dan `bench\points.json`, mencetak tiga tabel (PostGIS, MongoDB, urutan harness), dan menulis `results\ringkasan_explain.csv` (81 baris). Yang harus tampil:
+
+- PostGIS: median eksekusi kedua 0,356 ms (rencana kustom) dan 13,204 ms (rencana generik), rasio 37,1× (15 titik). Pada rencana generik indeks tanggal diperkirakan menghasilkan 37.477 baris, padahal aktualnya median 162.381 entri (8.496 sampai 439.265).
+- MongoDB: titik 3, 20, dan 19 memakai `event_type_1_dates.event_1` pada rencana bawaan; dengan `hint` waktunya 0,94; 1,20; dan 3,6 detik (bawaan 170,0; 190,3; 22,2 detik).
+
+### Langkah 2 — Lihat varian rencana di banding.csv
+
+```powershell
+Import-Csv results\banding.csv |
+  Where-Object { $_.varian -in 'bawaan','custom-plan' } |
+  Format-Table beban_kerja,skala,varian,median_ms_postgis
+```
+
+Harus tampil enam baris (median PostGIS, ms): W2 bawaan 1,408 dan custom-plan 0,731; W3 bawaan 9,058 dan custom-plan 0,791; W4 bawaan 11,495 dan custom-plan 17,239. Seri utama (kolom `varian` kosong): W2 1,202, W3 12,956, W4 32,973.
+
+### Langkah 3 — Cara membaca
+
+- Rencana kustom menurunkan W3 S100 11,5× dan W2 S100 1,9×, tetapi W4 S100 justru 1,5× lebih lambat (sebabnya belum diperiksa dengan `EXPLAIN`).
+- Hasil 25 Nov berasal dari sesi dan keadaan sistem yang berbeda dari seri utama (S100 PostGIS dimuat ulang; `explain` MongoDB dijalankan pada koleksi setelah batch W8, 7.570.556 dokumen). Median W4 bawaan sesi itu 2,9× lebih rendah dari seri utama, jadi bandingkan hanya dalam orde besaran.
+- `hint` MongoDB hanya diuji pada tujuh titik W4. Median W4 S100 (640 ms) tidak berubah olehnya; yang berubah hanya ekor p95.
+
+---
+
 ## RINGKASAN LOKASI FILE HASIL
 
 | Yang dicari | Berkas/folder | Cara buka |
 |---|---|---|
 | Perbandingan langsung 3 penyimpanan | `results/banding.csv` | Excel / `Import-Csv ... \| Format-Table` |
 | Statistik lengkap per grup | `results/ringkasan.csv` | Excel / `Import-Csv ...` |
-| Latensi per kueri (mentah) | `results/20261106_*.csv` dan `results/20261107_*.csv` | `Get-Content` / pandas |
+| Latensi per kueri (mentah) | `results/20261106_*.csv`, `results/20261107_*.csv`, dan `results/20261125_*.csv` | `Get-Content` / pandas |
 | Berkas 2 Nov (tidak dihitung) | `results/arsip/` | `Get-ChildItem` |
 | Ukuran disk MongoDB | `results/pengukuran_mongodb.csv` | Excel |
 | Ukuran disk PostGIS | `results/pengukuran_postgis.csv` | Excel |
 | Ukuran berkas mentah | `results/pengukuran_mentah.csv` | Excel |
+| Ringkasan EXPLAIN dan explain (penelusuran rencana kueri) | `results/ringkasan_explain.csv` | Excel / `python bench\ringkas_explain.py` |
+| Keluaran EXPLAIN dan explain mentah | `results/explain_*.txt` | Notepad |
 | Uji silang jumlah hasil S10 dan S100 | `results/uji_silang_S10_S100.txt` | Notepad |
 | Jawaban benar (wasit, hanya S1) | `bench/benar/W1_S1.csv` sampai `W6_S1.csv` | Excel |
 | Titik koordinat uji | `bench/points.json` | Notepad / `python -c "import json; ..."` |

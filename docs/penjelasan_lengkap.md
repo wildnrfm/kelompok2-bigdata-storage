@@ -16,6 +16,8 @@
 
 > **Catatan revisi (21 Nov 2026).** Ditambahkan **Bagian 13** (Tahap 3: pemrosesan dan analitik dengan Spark) beserta folder `analitik/` pada Bagian 10 dan 11; jumlah uji otomatis kini 22. Angka pada Bagian 7 sampai 9 tidak berubah, dan ukuran Parquet di HDFS masih belum punya berkas ukur (lihat 7.2).
 
+> **Catatan revisi (26 Nov 2026).** Ditambahkan **Bagian 7.6** (penelusuran rencana kueri, 25 Nov 2026) yang menjelaskan dua angka janggal pada seri utama: median W3 S100 PostGIS (rencana generik) dan ekor p95 W4 S100 MongoDB (indeks yang dipilih planner). Seri utama (6 sampai 7 Nov, konfigurasi bawaan) tidak diubah; hasil 25 Nov dilaporkan berdampingan dengannya. Karena enam berkas hasil baru ikut dihitung, `results/ringkasan.csv` kini 80 grup (sebelumnya 74) dan `results/banding.csv` 34 baris (sebelumnya 28) dari 96 berkas (31.026 baris; 30.066 dipakai); angka seri utama tidak berubah, dan enam grup tambahannya adalah varian `bawaan` dan `custom-plan`. Waktu muat dan waktu indeks S100 kini tercatat (Bagian 5 dan 7.2). `bench/ringkas_explain.py` menghasilkan `results/ringkasan_explain.csv` dari `results/explain_*.txt`.
+
 ---
 
 ## BAGIAN 1: APA ITU PROYEK INI?
@@ -249,7 +251,7 @@ Bukan kueri, tapi pengukuran:
 - Ukuran fisik data di disk (MiB)
 - Dicatat menggunakan skrip `bench/catat.py`
 
-**Status pencatatan (12 Nov 2026):** yang sudah ada di `results/` ialah ukuran di disk MongoDB dan PostGIS untuk S1, S10, dan S100 (`pengukuran_mongodb.csv`, `pengukuran_postgis.csv`), ukuran berkas mentah (`pengukuran_mentah.csv`), dan waktu bangun indeks hanya di S10 (MongoDB 23,9 detik; PostGIS 4,2 detik). **Belum tercatat:** waktu muat semua penyimpanan dan waktu indeks di S100. Ukuran Parquet di HDFS baru tercatat pada 22 Nov 2026 (`pengukuran_spark.csv`, lihat 7.2).
+**Status pencatatan (26 Nov 2026):** yang sudah ada di `results/` ialah ukuran di disk MongoDB dan PostGIS untuk S1, S10, dan S100 (`pengukuran_mongodb.csv`, `pengukuran_postgis.csv`), ukuran berkas mentah (`pengukuran_mentah.csv`), waktu bangun indeks di S10 (MongoDB 23,9 detik; PostGIS 4,2 detik), dan, sejak 25 Nov 2026, waktu muat dan waktu indeks di S100 (MongoDB 912,5 dan 242,4 detik; PostGIS 86,9 dan 46,9 detik; lihat 7.2). Ukuran Parquet di HDFS tercatat pada 22 Nov 2026 (`pengukuran_spark.csv`, lihat 7.2). **Belum tercatat:** waktu muat S1 dan S10, waktu indeks S1, dan W8 Spark.
 
 ### W8 — Batch Append (Tambah Data Ke Tabel Aktif)
 **Pertanyaan:** "Berapa lama waktu yang dibutuhkan untuk menambahkan 1 batch data baru (`batch100`, 74.956 baris anotasi + 4.392 patch) ke tabel S100 yang sudah berisi 7,5 juta baris dan sudah terindeks penuh?"
@@ -325,7 +327,7 @@ Spesifikasi di atas berlaku untuk seluruh pengukuran Bagian 7 (tahap penyimpanan
 
 ### 7.1 Perbandingan Latensi Median
 
-Sumber data: `results/banding.csv` (**28 baris**: 25 di tabel bawah ditambah 3 baris konkurensi) dan `results/ringkasan.csv` (**74 grup**, statistik lengkap per database × workload × skala × kondisi). Keduanya dibuat dengan `python bench/summarize.py --titik-maks 20` dari 90 berkas hasil 6 dan 7 Nov. Median dihitung dari semua kueri dan semua ulangan (3) tiap grup; skala S100 memakai titik 1 sampai 20. Angka tebal = tercepat.
+Sumber data: `results/banding.csv` (**34 baris**: 25 di tabel bawah, 3 baris konkurensi, dan 6 baris varian rencana kueri 25 Nov yang dibahas di 7.6) dan `results/ringkasan.csv` (**80 grup**, statistik lengkap per database × workload × skala × kondisi). Keduanya dibuat dengan `python bench/summarize.py --titik-maks 20` dari 96 berkas hasil (90 berkas 6 dan 7 Nov ditambah 6 berkas 25 Nov). Median dihitung dari semua kueri dan semua ulangan (3) tiap grup; skala S100 memakai titik 1 sampai 20. Angka tebal = tercepat. Tabel di bawah adalah **seri utama** (6 sampai 7 Nov, konfigurasi bawaan).
 
 **Tabel semua skenario dari `banding.csv`** (milidetik, median):
 
@@ -357,11 +359,11 @@ Sumber data: `results/banding.csv` (**28 baris**: 25 di tabel bawah ditambah 3 b
 | W6 | S10 | Warm | — | **14,412** | 21,971 | 516,875 | **MongoDB** | 35,9× |
 | W6 | S100 | Warm | — | 131,669 | **73,143** | 531,194 | **PostGIS** | 7,3× |
 
-Dari 18 skenario utama (6 beban × 3 skala, warm, tanpa varian), PostGIS tercepat pada 15; MongoDB tercepat pada W3 S100, W6 S1, dan W6 S10. Spark tidak pernah tercepat; yang terdekat adalah W5 S100 (1.293,2 ms melawan PostGIS 1.141,6 ms).
+Dari 18 skenario utama (6 beban × 3 skala, warm, tanpa varian), PostGIS tercepat pada 15 dengan konfigurasi bawaan; MongoDB tercepat pada W3 S100, W6 S1, dan W6 S10. Keunggulan MongoDB di W3 S100 muncul karena PostGIS memakai rencana generik (Bagian 7.6): dengan rencana kustom PostGIS 0,79 ms melawan MongoDB 11,23 ms (PostGIS dari pengulangan 25 Nov, MongoDB dari seri utama), sehingga PostGIS tercepat pada 16 dari 18. Spark tidak pernah tercepat; yang terdekat adalah W5 S100 (1.293,2 ms melawan PostGIS 1.141,6 ms).
 
 > **Catatan membaca tabel.**
 > - Baris **Cold** menggabungkan semua ulangan, padahal hanya ulangan 1 yang dingin (Bagian 6.1). Angka ulangan 1 ada di Bagian 7.5.
-> - **W3 S100 PostGIS Warm (12,956 ms) mencurigakan:** pada skenario yang sama, ulangan cold 2 dan 3 hanya sekitar 2,4 ms. Ukur ulang dengan `EXPLAIN (ANALYZE, BUFFERS)` sebelum angka ini dipakai untuk menyimpulkan bahwa MongoDB mengalahkan PostGIS di W3 S100.
+> - **W3 S100 PostGIS Warm (12,956 ms) terdistorsi rencana generik:** pada skenario yang sama, ulangan cold 2 dan 3 hanya sekitar 2,4 ms. Penelusuran 25 Nov (Bagian 7.6) menunjukkan sebabnya: setelah beberapa eksekusi PostgreSQL berpindah ke rencana generik yang sekitar 37 kali lebih lambat; dengan `plan_cache_mode = force_custom_plan` median W3 S100 turun menjadi 0,79 ms. Angka bawaan tetap dipertahankan di tabel karena itulah konfigurasi seri utama.
 > - Jumlah hasil MongoDB, PostGIS, dan Spark sama di semua kueri yang dibandingkan, kecuali S100 W2 titik 19 (Bagian 6.3).
 
 **W1 S100 dengan banyak klien** (median latensi per kueri; satu klien = baris W1 S100 pada tabel di atas):
@@ -408,7 +410,7 @@ Semua baris dihitung dari titik uji 1 sampai 20 (`--titik-maks 20`) supaya seban
 
 ### 7.5 Cold Run — Efek Cache Dingin (W3 & W5)
 
-Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ulangan per berkas (`--cold-warm cold --repeats 1 --first-run-no N`). Diuji pada W3 (spasial-temporal) dan W5 (agregasi besar). Pola waktunya menunjukkan hanya **ulangan 1** yang benar-benar dingin: ulangan 2 dan 3 sering jauh lebih cepat, misalnya PostGIS W3 S100 11,586 ms (ulangan 1), lalu 2,414 dan 2,447 ms. Karena itu tabel di bawah memakai **ulangan 1 saja**, dibandingkan dengan median warm dari Bagian 7.1. (Baris Cold di Bagian 7.1 menggabungkan ketiga ulangan.)
+Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ulangan per berkas (`--cold-warm cold --repeats 1 --first-run-no N`). Diuji pada W3 (spasial-temporal) dan W5 (agregasi besar). Pola waktunya menunjukkan hanya **ulangan 1** yang benar-benar dingin: ulangan 2 dan 3 sering jauh lebih cepat, misalnya PostGIS W3 S100 11,586 ms (ulangan 1), lalu 2,414 dan 2,447 ms (sebab gabungan cache dan rencana kueri untuk kasus ini dibahas di 7.6). Karena itu tabel di bawah memakai **ulangan 1 saja**, dibandingkan dengan median warm dari Bagian 7.1. (Baris Cold di Bagian 7.1 menggabungkan ketiga ulangan.)
 
 | Beban | Skala | MongoDB cold ul. 1 (ms) | MongoDB warm (ms) | Cold ÷ warm | PostGIS cold ul. 1 (ms) | PostGIS warm (ms) | Cold ÷ warm |
 |---|---|---|---|---|---|---|---|
@@ -417,9 +419,46 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 | W5 | S10 | 1.176,506 | 523,681 | 2,25× | 74,190 | 135,430 | 0,55× |
 | W5 | S100 | 4.486,238 | 6.869,304 | 0,65× | 838,717 | 1.141,604 | 0,73× |
 
-**Anomali.** Rasio di atas 1 berarti cold lebih lambat dari warm, seperti yang diharapkan; hanya tiga dari delapan rasio yang begitu (MongoDB W3 S10, W3 S100, W5 S10). Lima rasio lain di bawah 1, termasuk keempat skenario PostGIS, padahal cold seharusnya lebih lambat. Dua dugaan, belum diuji: (a) restart container tidak mengosongkan cache sistem operasi di mesin virtual Docker, jadi "cold" hanya mengosongkan cache di dalam database; (b) sesi warm terganggu hal lain di laptop. Paling dicurigai adalah median warm PostGIS W3 S100 (12,956 ms), karena ulangan cold 2 dan 3 pada skenario yang sama hanya sekitar 2,4 ms.
+**Anomali.** Rasio di atas 1 berarti cold lebih lambat dari warm, seperti yang diharapkan; hanya tiga dari delapan rasio yang begitu (MongoDB W3 S10, W3 S100, W5 S10). Lima rasio lain di bawah 1, termasuk keempat skenario PostGIS, padahal cold seharusnya lebih lambat. Dua dugaan, belum diuji: (a) restart container tidak mengosongkan cache sistem operasi di mesin virtual Docker, jadi "cold" hanya mengosongkan cache di dalam database; (b) sesi warm terganggu hal lain di laptop. Median warm PostGIS W3 S100 (12,956 ms) paling dicurigai karena ulangan cold 2 dan 3 pada skenario yang sama hanya sekitar 2,4 ms; penelusuran 25 Nov (Bagian 7.6) menunjukkan sebabnya, yaitu rencana generik yang dipakai setelah sepuluh kueri pertama pada tiap sesi klien. Itu menjelaskan cold yang lebih rendah dari warm pada W3 S100 (uji warm didahului satu putaran pemanasan), tetapi tidak menjelaskan tiga rasio PostGIS lain di bawah 1 dan MongoDB W5 S100; penjelasan itu belum diperiksa.
 
 **Yang aman disimpulkan.** Pada keempat skenario cold ulangan 1, PostGIS tetap lebih cepat dari MongoDB (0,804 vs 4,000; 11,586 vs 16,062; 74,190 vs 1.176,506; 838,717 vs 4.486,238 ms). Besar efek cold terhadap warm belum bisa dipastikan sebelum W3 dan W5 diukur ulang dengan restart sebelum setiap ulangan dan bukti bahwa cache memang kosong (di PostGIS lewat `EXPLAIN (ANALYZE, BUFFERS)`, baris `read=`).
+
+### 7.6 Penelusuran Rencana Kueri (25 Nov 2026)
+
+Dua angka pada seri utama tampak janggal: median W3 S100 PostGIS (12,956 ms, lebih lambat dari MongoDB padahal PostGIS tercepat di hampir semua skenario lain) dan ekor p95 W4 S100 MongoDB (206.458 ms, padahal mediannya 640 ms). Keduanya ditelusuri pada 25 Nov 2026 di laptop uji Bab III (laptop Elsa) dengan `EXPLAIN` dan pengulangan terkontrol. Seri utama tidak diubah; hasilnya dilaporkan berdampingan. Semua angka di bawah dirangkum oleh `python bench/ringkas_explain.py` (membaca `results/explain_*.txt`, menulis `results/ringkasan_explain.csv`, 81 baris).
+
+**PostGIS W3 S100: rencana kustom lawan rencana generik.**
+- Harness memakai psycopg 3 (`prepare_threshold` bawaan 5): setelah lima eksekusi, kueri disiapkan di sisi server dan PostgreSQL boleh berpindah dari rencana kustom (dihitung dengan nilai parameter sebenarnya) ke rencana generik (dihitung tanpa nilai parameter). Pada ulangan cold 2 dan 3 (`20261107_postgis_W3_S100_2.csv` dan `_3.csv`) sepuluh kueri pertama bermedian 1,1 dan 1,4 ms, sepuluh berikutnya 10,7 dan 10,6 ms. Pada uji warm, pemanasan satu putaran 20 kueri mendahului pencatatan, sehingga semua eksekusi tercatat berada setelah titik peralihan itu.
+- `EXPLAIN (ANALYZE, BUFFERS)` pada 15 titik W3 S100 yang punya hasil (S100 dimuat ulang dari awal): dengan `force_custom_plan`, 13 dari 15 titik memakai Index Scan pada `ann_center_gist` dan median eksekusi kedua **0,356 ms**; dengan `force_generic_plan` semua titik memakai Bitmap Heap Scan (BitmapAnd `ann_center_gist` dan `ann_event_date`), median **13,204 ms**, **37,1×** lebih lambat. Planner memperkirakan indeks tanggal menghasilkan 37.477 baris (selalu sama), padahal aktualnya median 162.381 entri (8.496 sampai 439.265). Titik 11 dan 19 memakai Bitmap Heap Scan pada kedua rencana.
+- Pengulangan harness S100 (20 titik, 3 ulangan, warm) dengan konfigurasi bawaan dan dengan `PGOPTIONS='-c plan_cache_mode=force_custom_plan'` (median, ms):
+
+| Beban | 6 Nov, bawaan (seri utama) | 25 Nov, bawaan | 25 Nov, rencana kustom |
+|---|---|---|---|
+| W2 | 1,202 | 1,408 | 0,731 |
+| W3 | 12,956 | 9,058 | 0,791 |
+| W4 | 32,973 | 11,495 | 17,239 |
+
+- Rencana kustom menurunkan W3 S100 dari 9,058 ke 0,791 ms (11,5×) dan W2 dari 1,408 ke 0,731 ms (1,9×), tetapi pada W4 justru lebih lambat (17,239 berbanding 11,495 ms, 1,5×; sebabnya belum diperiksa dengan `EXPLAIN`). Dengan 0,791 ms PostGIS juga lebih cepat dari MongoDB (11,231 ms) pada W3 S100, jadi PostGIS tercepat pada 16 dari 18 skenario utama.
+- Median W4 bawaan sesi 25 Nov 2,9× lebih rendah dari seri utama (11,495 berbanding 32,973 ms): angka antar sesi hanya sebanding dalam orde besaran.
+
+**MongoDB W4 S100: planner memilih indeks yang salah.**
+- `explain("executionStats")` pada tujuh titik W4 S100 (plan cache dikosongkan lebih dulu; koleksi S100 setelah batch W8, 7.570.556 dokumen, sekitar 1% lebih besar dari saat harness), rencana bawaan dibanding `hint("bbox_2dsphere")`:
+
+| Titik | Lokasi, jenis | Indeks bawaan | Kunci diperiksa | Bawaan (detik) | Dengan hint (detik) |
+|---|---|---|---|---|---|
+| 3 | Hiroshima, Rainfall | `event_type_1_dates.event_1` | 5.321.286 | 170,02 | 0,94 |
+| 20 | Hiroshima, Rainfall | `event_type_1_dates.event_1` | 5.321.286 | 190,33 | 1,20 |
+| 19 | DominicaMaria, Hurricane | `event_type_1_dates.event_1` | 1.027.372 | 22,16 | 3,60 |
+| 5 | Hokkaido, Earthquake | `bbox_2dsphere` | 210.108 | 1,14 | 0,56 |
+| 11 | Italy, Rainfall | `bbox_2dsphere` | 864.992 | 22,86 | 18,31 |
+| 1 | Kyrgyzstan1, Rainfall | `bbox_2dsphere` | 80.542 | 1,57 | 0,24 |
+| 12 | USA_PuertoRico, Earthquake | `bbox_2dsphere` | 10.245 | 0,09 | 0,05 |
+
+- Untuk titik 3 dan 20 (Hiroshima, Rainfall) dan titik 19 (DominicaMaria, Hurricane), planner memilih indeks majemuk `event_type_1_dates.event_1` (kesamaan pada `event_type` yang sangat umum) dan memeriksa 5,3 juta kunci (titik 3 dan 20) atau 1,0 juta kunci (titik 19), padahal `bbox_2dsphere`, yang ditolak, hanya memeriksa 169 ribu sampai 311 ribu kunci. Pada empat titik lain planner sudah memilih `bbox_2dsphere`.
+- Putar ulang urutan harness (titik 1, 2, 3): plan cache menyimpan `bbox_2dsphere` dari titik 1 dan 2, lalu titik 3 memicu perencanaan ulang yang memilih `event_type_1_dates.event_1` dan memakan 160 detik. Jadi kesalahan terjadi baik dengan plan cache kosong maupun dalam urutan harness.
+- Ketiga titik itu tetap di atas median W4 S100 MongoDB (640 ms) meskipun dengan `hint`, sehingga median itu tidak berubah; yang berubah hanya ekor p95.
+
+**Kesimpulan dan batas.** Pada kueri berparameter yang menggabungkan kondisi spasial dengan tanggal atau atribut, rencana bawaan dapat puluhan sampai ratusan kali lebih lambat dari rencana lain pada indeks yang sama (PostGIS sekitar 37 kali pada W3; MongoDB sekitar 160 sampai 180 kali pada W4). Seri utama tetap melaporkan konfigurasi bawaan kedua sistem. Penyetelan (`force_custom_plan` pada PostGIS, `hint` pada MongoDB) hanya diukur pada kasus di atas, bukan pada seluruh beban kerja; pengaruhnya pada W2 sampai W4 di S1 dan S10 serta pada rasio E1 (yang memakai baseline berindeks PostGIS) belum diukur. Sesi 25 Nov berbeda dari seri utama (S100 PostGIS dimuat ulang; `explain` MongoDB pada koleksi setelah batch W8), dan `hint` hanya diuji pada tujuh titik.
 
 ---
 
@@ -431,16 +470,16 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 
 **Hasil:** **DITERIMA SEBAGIAN.**
 - Bagian pertama terbukti: di S1, S10, dan S100, MongoDB dan PostGIS lebih cepat dari Spark pada W2 dan W3. Di S100 selisihnya 49× sampai 454×.
-- Bagian kedua (selisih makin besar) hanya terbukti pada W2. Kecepatan relatif terhadap Spark, dari S1 ke S100:
+- Bagian kedua (selisih makin besar) baru terbukti pada W2; pada W3 angka PostGIS S100 terdistorsi rencana generik (Bagian 7.6). Kecepatan relatif terhadap Spark, dari S1 ke S100:
 
 | Beban | PostGIS | MongoDB |
 |---|---|---|
 | W2 | ≈ 120× → ≈ 454× (melebar) | ≈ 55× → ≈ 62× (melebar) |
-| W3 | ≈ 126× → ≈ 49× (mengecil; angka PostGIS W3 S100 perlu diukur ulang, lihat 7.5) | ≈ 62× → ≈ 57× (mengecil) |
+| W3 | ≈ 126× → ≈ 49× (tampak mengecil, tetapi angka PostGIS W3 S100 terdistorsi rencana generik; dengan rencana kustom ≈ 805×, lihat 7.6) | ≈ 62× → ≈ 57× (mengecil) |
 
 - Latensi W2 saat data membesar 100× (S1 ke S100): PostGIS 0,96 → 1,20 ms; MongoDB 2,10 → 8,83 ms (naik sekitar 4,2×).
 - Eksperimen E1 (S10, tanpa indeks): W2 MongoDB 455× dan PostGIS 235× lebih lambat; W3 MongoDB 203× dan PostGIS 77× lebih lambat (Bagian 7.3).
-- **Penjelasan:** indeks pohon spasial membatasi pemindaian ke cabang yang relevan, sedangkan Spark memindai seluruh Parquet. Itu menjelaskan kenapa PostGIS hampir datar pada W2. Kenapa selisih W3 mengecil belum diselidiki.
+- **Penjelasan:** indeks pohon spasial membatasi pemindaian ke cabang yang relevan, sedangkan Spark memindai seluruh Parquet. Itu menjelaskan kenapa PostGIS hampir datar pada W2. Selisih W3 yang tampak mengecil pada PostGIS sebagian besar akibat rencana generik di W3 S100 (Bagian 7.6): dengan rencana kustom (0,791 ms) PostGIS sekitar 805× lebih cepat dari Spark (636,9 ms). Efek yang sama pada S1 dan S10 belum diperiksa, jadi bagian "selisih makin besar" tetap baru terbukti pada W2 dan status H1 tetap diterima sebagian.
 
 ### H2 — PostGIS Lebih Cepat dari MongoDB untuk Bounding Box (W4)
 
@@ -450,7 +489,8 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 - Median W4: PostGIS lebih cepat di ketiga skala dan selisihnya melebar: **8,3×** (S1: 1,14 vs 9,43 ms), **11,3×** (S10: 2,01 vs 22,7 ms), **19,4×** (S100: 33,0 vs 640,0 ms)
 - p95 di S100: PostGIS 1.484 ms vs MongoDB 206.458 ms (≈ 3,4 menit)
 - Ekor MongoDB itu berasal dari dua titik saja: titik 3 dan titik 20 (keduanya Hiroshima, Rainfall, sekitar 33 ribu hasil), 186 sampai 218 detik per eksekusi (6 dari 60 eksekusi). Titik yang sama dijawab PostGIS dalam 75 sampai 123 ms dan Spark dalam 0,9 sampai 1,0 detik. Dua titik dengan hasil jauh lebih banyak (titik 11 Italy, 382.668 hasil; titik 19 DominicaMaria, 124.247 hasil) di MongoDB hanya 22 sampai 28 detik, jadi lambatnya bukan semata karena jumlah hasil.
-- **Dugaan sebab (belum diuji):** rencana kueri yang dipilih MongoDB untuk dua titik itu berbeda dari titik lain, misalnya memakai indeks `event_type` + tanggal, bukan `bbox_2dsphere`. Cara membuktikan: jalankan `explain("executionStats")` untuk titik 3 dan 20 (`mongodb/queries/w4.js`, `ANN_ID` diambil dari `bench/points.json`). Penjelasan lama di dokumen ini (GiST membandingkan float secara native; 2dsphere memakai "sel Geohash S2" yang makin berat bila data padat) tidak terbukti, dan S2 bukan Geohash.
+- **Sebab (terbukti dengan `explain`, 25 Nov, Bagian 7.6):** untuk titik 3 dan 20 planner MongoDB memilih indeks majemuk `event_type_1_dates.event_1` (kesamaan pada `event_type` yang sangat umum) dan memeriksa 5,3 juta kunci, padahal `bbox_2dsphere` hanya memeriksa sekitar 169 ribu sampai 311 ribu. Dengan `hint("bbox_2dsphere")` titik 3 turun dari 170,0 ke 0,94 detik dan titik 20 dari 190,3 ke 1,20 detik; titik 19 (DominicaMaria, Hurricane) serupa (22,2 ke 3,6 detik). Median W4 S100 (640 ms) tidak berubah oleh `hint`; hanya ekor p95 yang berubah. Penjelasan lama di dokumen ini (GiST membandingkan float secara native; 2dsphere memakai "sel Geohash S2" yang makin berat bila data padat) tidak terbukti, dan S2 bukan Geohash.
+- Pengulangan PostGIS 25 Nov memberi median W4 S100 11,5 ms (bawaan) dan 17,2 ms (rencana kustom), jadi 55,7× dan 37,1× lebih cepat dari median MongoDB seri utama (640,0 ms). Median W4 bawaan sesi itu 2,9× lebih rendah dari seri utama (32,973 ms), sehingga angka antar sesi hanya sebanding dalam orde besaran. Arah dan kesimpulan H2 tidak berubah.
 
 ### H3 — Urutan Efisiensi Disk: Parquet < PostGIS < MongoDB
 
@@ -491,12 +531,14 @@ Cold run dijalankan dengan me-restart container Docker, lalu menjalankan satu ul
 - Ketika kapasitas disk terbatas dan kompresi penting (1,82 GiB vs 3,42 GiB di S100, lawan PostGIS)
 - Ketika membutuhkan skalabilitas horizontal (*sharding*) tanpa perubahan besar arsitektur (tidak diuji di proyek ini)
 - Kueri titik tunggal W1 sub-2 ms (median 0,8 sampai 1,5 ms), walau PostGIS sama cepat atau lebih cepat (0,7 sampai 1,2 ms)
+- Catatan: pada W4 S100 planner dapat memilih indeks `event_type` + tanggal yang jauh lebih lambat dari `bbox_2dsphere`; periksa dengan `explain` dan beri `hint` bila perlu (Bagian 7.6)
 
 ### Kapan Pakai PostgreSQL/PostGIS?
 - Ketika aplikasi membutuhkan kueri spasial poligon dan bounding box yang kompleks
 - Ketika akurasi SQL relasional dengan JOIN dan constraint penting
 - Web GIS, peta interaktif, analisis spasial operasional
-- Kueri W2, W3, dan W4 paling cepat pada 8 dari 9 skenario skala (pengecualian W3 S100, yang perlu diukur ulang); hingga 454× lebih cepat dari Spark (W2 S100) dan 19,4× lebih cepat dari MongoDB (W4 S100)
+- Kueri W2, W3, dan W4 paling cepat pada 8 dari 9 skenario skala dengan konfigurasi bawaan (pengecualian W3 S100: rencana generik; dengan rencana kustom PostGIS juga tercepat di sana, Bagian 7.6); hingga 454× lebih cepat dari Spark (W2 S100) dan 19,4× lebih cepat dari MongoDB (W4 S100)
+- Pilihan rencana kueri memengaruhi hasil di kedua sistem: rencana bawaan dapat sekitar 37× (PostGIS W3) sampai 180× (MongoDB W4) lebih lambat dari rencana lain pada indeks yang sama, jadi `EXPLAIN` perlu menjadi bagian dari pengujian
 
 ### Kapan Pakai Spark + Parquet?
 - Ketika kebutuhan utama adalah agregasi analitik pada dataset sangat besar (>5 juta baris): di S100 Spark 5,3× lebih cepat dari MongoDB pada W5, tetapi PostGIS masih 1,13× lebih cepat (1.141,6 vs 1.293,2 ms)
@@ -572,20 +614,23 @@ kelompok2-bigdata-storage/
 │   ├── kebenaran.py            ← Validasi keabsahan hasil
 │   ├── compare_counts.py       ← Bandingkan hasil antar database
 │   ├── summarize.py            ← Generate ringkasan dan banding CSV
+│   ├── ringkas_explain.py      ← Ringkas keluaran EXPLAIN/explain (penelusuran rencana kueri)
 │   ├── catat.py                ← Catat ukuran disk dan metrik W7/W8
 │   ├── make_points.py          ← Generator titik uji deterministik
 │   ├── points.json             ← 100 titik uji koordinat
 │   └── benar/                  ← Ground truth jawaban benar W1–W6 S1
 │
 ├── results/                ← Semua hasil pengukuran (di-commit)
-│   ├── ringkasan.csv           ← Ringkasan 74 grup (median, p95, dll)
-│   ├── banding.csv             ← Perbandingan langsung 28 baris
+│   ├── ringkasan.csv           ← Ringkasan 80 grup (median, p95, dll)
+│   ├── banding.csv             ← Perbandingan langsung 34 baris
+│   ├── ringkasan_explain.csv   ← Ringkasan EXPLAIN dan explain (penelusuran rencana kueri)
+│   ├── explain_*.txt           ← Keluaran EXPLAIN (PostGIS W3 S100) dan explain (MongoDB W4 S100)
 │   ├── pengukuran_mentah.csv   ← Ukuran file mentah
-│   ├── pengukuran_mongodb.csv  ← Ukuran disk, waktu indeks S10, W8 MongoDB
-│   ├── pengukuran_postgis.csv  ← Ukuran disk, waktu indeks S10, W8 PostGIS
+│   ├── pengukuran_mongodb.csv  ← Ukuran disk, waktu indeks S10 dan S100, muat S100, W8 MongoDB
+│   ├── pengukuran_postgis.csv  ← Ukuran disk, waktu indeks S10 dan S100, muat S100, W8 PostGIS
 │   ├── uji_silang_S10_S100.txt ← Hasil compare_counts untuk S10 dan S100
 │   ├── analitik/               ← Hasil Tahap 3: S1/, S10/, S100/ (14 CSV tiap skala), waktu, grafik/
-│   ├── 20261106_*.csv, 20261107_*.csv  ← 90 file hasil benchmark mentah
+│   ├── 20261106_*.csv, 20261107_*.csv, 20261125_*.csv  ← 96 file hasil benchmark mentah
 │   └── arsip/                  ← 21 file 2 Nov (tidak dihitung)
 │
 ├── docs/                   ← Dokumen deliverable

@@ -3,7 +3,7 @@
 """Ringkas berkas hasil uji: median, p95, rata-rata, rentang antar ulangan, dan tabel banding.
 
 Cara pakai (dari akar repo, PowerShell):
-  python bench/summarize.py                      semua results/*.csv (kecuali ringkasan)
+  python bench/summarize.py                      semua results/*.csv (kecuali ringkasan*, banding, pengukuran_*)
   python bench/summarize.py results/A.csv ...    hanya berkas yang disebut
   python bench/summarize.py --titik-maks 20      S100 hanya kueri_id 1 sampai 20 (lihat di bawah)
 Hasil dicetak dan ditulis ke results/ringkasan.csv dan results/banding.csv
@@ -155,8 +155,8 @@ def main(argv=None):
         berkas = [Path(a) for a in arg]
     else:
         berkas = sorted(p for p in folder.glob("*.csv")
-                        if p.name not in ("ringkasan.csv", "banding.csv")
-                        and not p.name.startswith("pengukuran_"))
+                        if p.name != "banding.csv"
+                        and not p.name.startswith(("ringkasan", "pengukuran_")))
     if not berkas:
         raise SystemExit("Tidak ada berkas hasil di %s" % folder)
     grup = {}

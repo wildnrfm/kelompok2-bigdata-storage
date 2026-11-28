@@ -1,0 +1,82 @@
+penyimpanan,beban_kerja,skala,titik,ann_id,kondisi,rencana,indeks,diperiksa_estimasi,diperiksa_aktual,waktu_ms,lokasi_jenis
+postgis,W3,S100,8,2594,rencana kustom ke-1,Index Scan,ann_center_gist,,,1.432,
+postgis,W3,S100,8,2594,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.066,
+postgis,W3,S100,8,2594,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,8496,0.714,
+postgis,W3,S100,8,2594,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,8496,0.626,
+postgis,W3,S100,13,2633,rencana kustom ke-1,Index Scan,ann_center_gist,,,0.629,
+postgis,W3,S100,13,2633,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.096,
+postgis,W3,S100,13,2633,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,162814,14.904,
+postgis,W3,S100,13,2633,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,162814,14.292,
+postgis,W3,S100,19,12047,rencana kustom ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,162837,162381,33.703,
+postgis,W3,S100,19,12047,rencana kustom ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,162837,162381,22.131,
+postgis,W3,S100,19,12047,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,162381,14.456,
+postgis,W3,S100,19,12047,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,162381,14.33,
+postgis,W3,S100,20,14099,rencana kustom ke-1,Index Scan,ann_center_gist,,,10.649,
+postgis,W3,S100,20,14099,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.356,
+postgis,W3,S100,20,14099,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187109,16.331,
+postgis,W3,S100,20,14099,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187109,13.204,
+postgis,W3,S100,3,14260,rencana kustom ke-1,Index Scan,ann_center_gist,,,19.864,
+postgis,W3,S100,3,14260,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.428,
+postgis,W3,S100,3,14260,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187109,16.02,
+postgis,W3,S100,3,14260,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187109,17.479,
+postgis,W3,S100,15,16084,rencana kustom ke-1,Index Scan,ann_center_gist,,,17.341,
+postgis,W3,S100,15,16084,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.615,
+postgis,W3,S100,15,16084,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,172143,23.064,
+postgis,W3,S100,15,16084,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,172143,18.355,
+postgis,W3,S100,5,16461,rencana kustom ke-1,Index Scan,ann_center_gist,,,12.094,
+postgis,W3,S100,5,16461,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.354,
+postgis,W3,S100,5,16461,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,172143,12.547,
+postgis,W3,S100,5,16461,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,172143,13.524,
+postgis,W3,S100,16,18342,rencana kustom ke-1,Index Scan,ann_center_gist,,,30.508,
+postgis,W3,S100,16,18342,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.391,
+postgis,W3,S100,16,18342,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,141454,13.02,
+postgis,W3,S100,16,18342,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,141454,11.869,
+postgis,W3,S100,7,18466,rencana kustom ke-1,Index Scan,ann_center_gist,,,8.147,
+postgis,W3,S100,7,18466,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.484,
+postgis,W3,S100,7,18466,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,141454,12.993,
+postgis,W3,S100,7,18466,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,141454,12.531,
+postgis,W3,S100,11,65994,rencana kustom ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,447455,439265,124.961,
+postgis,W3,S100,11,65994,rencana kustom ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,447455,439265,38.833,
+postgis,W3,S100,11,65994,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,439265,37.912,
+postgis,W3,S100,11,65994,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,439265,41.988,
+postgis,W3,S100,1,67439,rencana kustom ke-1,Index Scan,ann_center_gist,,,2.829,
+postgis,W3,S100,1,67439,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.148,
+postgis,W3,S100,1,67439,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,110047,10.752,
+postgis,W3,S100,1,67439,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,110047,9.078,
+postgis,W3,S100,9,69964,rencana kustom ke-1,Index Scan,ann_center_gist,,,11.3,
+postgis,W3,S100,9,69964,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.147,
+postgis,W3,S100,9,69964,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,101355,7.337,
+postgis,W3,S100,9,69964,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,101355,6.631,
+postgis,W3,S100,10,70904,rencana kustom ke-1,Index Scan,ann_center_gist,,,0.243,
+postgis,W3,S100,10,70904,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.053,
+postgis,W3,S100,10,70904,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,77394,6.474,
+postgis,W3,S100,10,70904,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,77394,5.252,
+postgis,W3,S100,17,74571,rencana kustom ke-1,Index Scan,ann_center_gist,,,0.955,
+postgis,W3,S100,17,74571,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.093,
+postgis,W3,S100,17,74571,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187710,14.142,
+postgis,W3,S100,17,74571,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,187710,16.434,
+postgis,W3,S100,12,74720,rencana kustom ke-1,Index Scan,ann_center_gist,,,1.414,
+postgis,W3,S100,12,74720,rencana kustom ke-2,Index Scan,ann_center_gist,,,0.377,
+postgis,W3,S100,12,74720,rencana generik ke-1,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,36504,2.784,
+postgis,W3,S100,12,74720,rencana generik ke-2,Bitmap Heap Scan,ann_center_gist+ann_event_date,37477,36504,2.373,
+mongodb,W4,S100,19,12047,bawaan (plan cache kosong),FETCH > IXSCAN,event_type_1_dates.event_1,bbox_2dsphere,1027372,22163.0,"DominicaMaria, Hurricane"
+mongodb,W4,S100,19,12047,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,310631,3600.0,"DominicaMaria, Hurricane"
+mongodb,W4,S100,19,12047,countDocuments (plan cache kosong),,,,,17846.0,"DominicaMaria, Hurricane"
+mongodb,W4,S100,20,14099,bawaan (plan cache kosong),FETCH > IXSCAN,event_type_1_dates.event_1,bbox_2dsphere,5321286,190325.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,20,14099,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,170110,1198.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,20,14099,countDocuments (plan cache kosong),,,,,187449.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,3,14260,bawaan (plan cache kosong),FETCH > IXSCAN,event_type_1_dates.event_1,bbox_2dsphere,5321286,170020.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,3,14260,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,169121,943.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,3,14260,countDocuments (plan cache kosong),,,,,163503.0,"Hiroshima, Rainfall"
+mongodb,W4,S100,5,16461,bawaan (plan cache kosong),FETCH > IXSCAN,bbox_2dsphere,event_type_1_dates.event_1,210108,1139.0,"Hokkaido, Earthquake"
+mongodb,W4,S100,5,16461,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,210108,561.0,"Hokkaido, Earthquake"
+mongodb,W4,S100,5,16461,countDocuments (plan cache kosong),,,,,678.0,"Hokkaido, Earthquake"
+mongodb,W4,S100,11,65994,bawaan (plan cache kosong),FETCH > IXSCAN,bbox_2dsphere,event_type_1_dates.event_1 | event_type_1_dates.event_1 | bbox_2dsphere,864992,22862.0,"Italy, Rainfall"
+mongodb,W4,S100,11,65994,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,864992,18306.0,"Italy, Rainfall"
+mongodb,W4,S100,11,65994,countDocuments (plan cache kosong),,,,,18882.0,"Italy, Rainfall"
+mongodb,W4,S100,1,67439,bawaan (plan cache kosong),FETCH > IXSCAN,bbox_2dsphere,event_type_1_dates.event_1 | event_type_1_dates.event_1 | bbox_2dsphere,80542,1573.0,"Kyrgyzstan1, Rainfall"
+mongodb,W4,S100,1,67439,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,80542,237.0,"Kyrgyzstan1, Rainfall"
+mongodb,W4,S100,1,67439,countDocuments (plan cache kosong),,,,,1080.0,"Kyrgyzstan1, Rainfall"
+mongodb,W4,S100,12,74720,bawaan (plan cache kosong),FETCH > IXSCAN,bbox_2dsphere,event_type_1_dates.event_1,10245,94.0,"USA_PuertoRico, Earthquake"
+mongodb,W4,S100,12,74720,hint bbox_2dsphere,FETCH > IXSCAN,bbox_2dsphere,tidak ada,10245,54.0,"USA_PuertoRico, Earthquake"
+mongodb,W4,S100,12,74720,countDocuments (plan cache kosong),,,,,68.0,"USA_PuertoRico, Earthquake"
